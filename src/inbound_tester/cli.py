@@ -132,7 +132,10 @@ def run_one(scenario: Path, no_eval: bool, agent_id: str | None, mode: str | Non
         runner = ConversationRunner(settings)
         
     result = asyncio.run(runner.run_scenario(cfg, skip_evaluation=no_eval))
+    _save_single_call_report(result.to_dict())
     _print_result(result.to_dict())
+    
+    _save_markdown_report([result.to_dict()])
 
 
 @cli.command("run-all")
@@ -173,14 +176,18 @@ def run_all(scenarios_dir: Path, parallel: bool, no_eval: bool, agent_id: str | 
                 if isinstance(result, Exception):
                     out.append({"scenario_id": scenario.id, "status": "error", "error": str(result)})
                 else:
-                    out.append(result.to_dict())
+                    res_dict = result.to_dict()
+                    _save_single_call_report(res_dict)
+                    out.append(res_dict)
             return out
 
         out = []
         for scenario in scenarios:
             try:
                 result = await runner.run_scenario(scenario, skip_evaluation=no_eval)
-                out.append(result.to_dict())
+                res_dict = result.to_dict()
+                _save_single_call_report(res_dict)
+                out.append(res_dict)
             except Exception as exc:
                 out.append({"scenario_id": scenario.id, "status": "error", "error": str(exc)})
         return out
@@ -190,6 +197,18 @@ def run_all(scenarios_dir: Path, parallel: bool, no_eval: bool, agent_id: str | 
     click.echo(f"\n=== Summary: {passed}/{len(results)} passed ===")
     for result in results:
         _print_result(result, compact=True)
+
+    if settings.sqlite_path:
+        from inbound_tester.audit_system import AuditSystem
+        audit = AuditSystem(settings.sqlite_path)
+        coverage = audit.get_coverage_report()
+        click.echo("\n=== Persona Scenario Coverage Matrix ===")
+        click.echo(f"Overall Coverage: {coverage['overall_coverage_pct']}%")
+        for dim, data in coverage.get("dimensions", {}).items():
+            if data.get("total_values", 0) > 0:
+                click.echo(f"  {dim}: {data['coverage_pct']}% ({data['covered_values']}/{data['total_values']})")
+
+    _save_markdown_report(results, coverage=coverage if settings.sqlite_path else None)
 
 
 @cli.command("list-runs")
@@ -234,6 +253,68 @@ def show_run(run_id: str) -> None:
 
     click.echo(json.dumps(full, indent=2, default=str))
 
+def _save_markdown_report(results: list[dict], coverage: dict | None = None) -> None:
+    from datetime import datetime
+    
+    reports_dir = Path("reports")
+    reports_dir.mkdir(parents=True, exist_ok=True)
+    
+    ts = datetime.now().strftime("%Y%m%d_%H%M%S")
+    filepath = reports_dir / f"test_report_{ts}.md"
+    
+    with open(filepath, "w", encoding="utf-8") as f:
+        f.write("# Inbound Tester Evaluation Report\n\n")
+        f.write(f"**Date:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n")
+        
+        passed = sum(1 for r in results if r.get("evaluation", {}) and r.get("evaluation", {}).get("passed"))
+        f.write(f"## Summary\n")
+        f.write(f"- **Total Scenarios Run:** {len(results)}\n")
+        f.write(f"- **Passed:** {passed}\n")
+        f.write(f"- **Failed/Error:** {len(results) - passed}\n\n")
+        
+        if coverage:
+            f.write("## Persona Scenario Coverage\n")
+            f.write(f"**Overall Coverage:** {coverage.get('overall_coverage_pct', 0)}%\n\n")
+            for dim, data in coverage.get("dimensions", {}).items():
+                if data.get("total_values", 0) > 0:
+                    f.write(f"- **{dim}**: {data.get('coverage_pct', 0)}% ({data.get('covered_values', 0)}/{data.get('total_values', 0)})\n")
+            f.write("\n")
+            
+        f.write("## Detailed Results\n\n")
+        for res in results:
+            eval_data = res.get("evaluation") or {}
+            is_pass = eval_data.get("passed")
+            label = "PASS" if is_pass else ("FAIL" if is_pass is False else "N/A")
+            
+            f.write(f"### [{label}] {res.get('scenario_id', 'Unknown')}\n")
+            f.write(f"- **Status:** {res.get('status')}\n")
+            f.write(f"- **Turns:** {res.get('turn_count')}\n")
+            if res.get("duration_sec"):
+                f.write(f"- **Duration:** {res['duration_sec']:.1f}s\n")
+            if res.get("avg_latency_ms"):
+                f.write(f"- **Avg Latency:** {res['avg_latency_ms']:.0f}ms\n")
+                
+            if eval_data:
+                f.write("\n#### Evaluation\n")
+                if eval_data.get("llm_score") is not None:
+                    f.write(f"- **Semantic Score:** {eval_data['llm_score']}\n")
+                if eval_data.get("llm_summary"):
+                    f.write(f"- **Semantic Summary:** {eval_data['llm_summary']}\n")
+                if eval_data.get("audio_score") is not None:
+                    f.write(f"- **Audio Score:** {eval_data['audio_score']}\n")
+                if eval_data.get("audio_summary"):
+                    f.write(f"- **Audio Summary:** {eval_data['audio_summary']}\n")
+                    
+                rules = eval_data.get("rule_results", [])
+                if rules:
+                    f.write("\n**Rule Checks:**\n")
+                    for rule in rules:
+                        rmark = "✅" if rule.get("passed") else "❌"
+                        f.write(f"- {rmark} **{rule.get('id')}**: {rule.get('detail')}\n")
+                        
+            f.write("\n---\n\n")
+            
+    click.echo(f"\n📝 Saved detailed markdown report to: {filepath}")
 
 def _print_result(result: dict, compact: bool = False) -> None:
     evaluation = result.get("evaluation") or {}

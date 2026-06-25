@@ -348,7 +348,7 @@ class VoiceRunner:
         evaluation: EvaluationResult | None = None
         if not skip_evaluation:
             evaluation = await asyncio.to_thread(
-                self.evaluator.evaluate, scenario, client.session.transcript
+                self.evaluator.evaluate, scenario, client.session.transcript, audio_path=wav_path
             )
 
         avg_latency = (
@@ -374,7 +374,7 @@ class VoiceRunner:
             avg_outbound_latency_ms=avg_outbound,
         )
 
-        return RunResult(
+        res = RunResult(
             test_run_id=test_run_id,
             scenario_id=scenario.id,
             conversation_id=client.session.conversation_id,
@@ -387,6 +387,59 @@ class VoiceRunner:
             outbound_latencies_ms=outbound_latencies,
             duration_sec=duration_sec,
         )
+        
+        self._save_single_call_report(res.to_dict())
+        
+        return res
+
+    def _save_single_call_report(self, res: dict) -> None:
+        from datetime import datetime
+        from pathlib import Path
+        
+        recordings_dir = Path("recordings")
+        recordings_dir.mkdir(parents=True, exist_ok=True)
+        
+        ts = datetime.now().strftime("%Y%m%d_%H%M%S")
+        scenario_id = res.get("scenario_id", "Unknown").replace(" ", "_")[:30]
+        filepath = recordings_dir / f"{scenario_id}_{ts}_report.md"
+        
+        eval_data = res.get("evaluation") or {}
+        is_pass = eval_data.get("passed")
+        label = "PASS" if is_pass else ("FAIL" if is_pass is False else "N/A")
+        
+        with open(filepath, "w", encoding="utf-8") as f:
+            f.write(f"# Call Report: {scenario_id}\n\n")
+            f.write(f"**Date:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
+            f.write(f"**Status:** [{label}] {res.get('status')}\n")
+            f.write(f"**Turns:** {res.get('turn_count')}\n")
+            if res.get("duration_sec"):
+                f.write(f"**Duration:** {res['duration_sec']:.1f}s\n")
+            if res.get("avg_latency_ms"):
+                f.write(f"**Avg Latency:** {res['avg_latency_ms']:.0f}ms\n")
+                
+            if eval_data:
+                f.write("\n## Evaluation\n\n")
+                if eval_data.get("llm_score") is not None:
+                    f.write(f"- **Semantic Score:** {eval_data['llm_score']}\n")
+                if eval_data.get("llm_summary"):
+                    f.write(f"- **Semantic Summary:** {eval_data['llm_summary']}\n")
+                if eval_data.get("audio_score") is not None:
+                    f.write(f"- **Audio Score:** {eval_data['audio_score']}\n")
+                if eval_data.get("audio_summary"):
+                    f.write(f"- **Audio Summary:** {eval_data['audio_summary']}\n")
+                    
+                rules = eval_data.get("rule_results", [])
+                if rules:
+                    f.write("\n### Rule Checks\n")
+                    for rule in rules:
+                        rmark = "✅" if rule.get("passed") else "❌"
+                        f.write(f"- {rmark} **{rule.get('id')}**: {rule.get('detail')}\n")
+                        
+            f.write("\n## Transcript\n\n")
+            for entry in res.get("transcript") or []:
+                role = entry.get('role', 'unknown').capitalize()
+                text = entry.get('text', '')
+                f.write(f"**{role}:** {text}\n\n")
 
     async def _synthesize_and_send(self, bridge: AudioBridge, text: str) -> None:
         """Synthesize *text* via ElevenLabs TTS and send as user_audio_chunk."""

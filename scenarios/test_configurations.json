@@ -1,0 +1,2675 @@
+{
+  "metadata": {
+    "phase": 2,
+    "generated_at": "2026-06-18T10:30:00Z",
+    "total_dimensions": 14,
+    "total_configurations": 114
+  },
+  "dimensions": {
+    "dimension_1_personas": [
+      {
+        "id": "persona_1",
+        "name": "Cooperative",
+        "description": "Helpful, wants to resolve issue quickly, provides accurate information.",
+        "config": {
+          "persona_name": "cooperative",
+          "cooperation_level": 9,
+          "patience_level": 8,
+          "interrupt_probability": 0.1,
+          "response_length": "medium",
+          "challenge_probability": 0.1,
+          "off_topic_probability": 0.05,
+          "information_sharing_probability": 0.95,
+          "politeness_level": 0.9,
+          "confidence_level": 0.8,
+          "memory_retention": 0.9,
+          "key_traits": [
+            "helpful",
+            "efficient",
+            "polite"
+          ],
+          "typical_phrases": [
+            "Haan, bilkul sahi hai.",
+            "Of course, let me help you.",
+            "Yes, that's correct."
+          ],
+          "triggers": [
+            "direct_request",
+            "clear_explanation"
+          ]
+        }
+      },
+      {
+        "id": "persona_2",
+        "name": "Angry",
+        "description": "Hostile, aggressive, interrupts frequently, demands immediate resolution.",
+        "config": {
+          "persona_name": "angry",
+          "cooperation_level": 2,
+          "patience_level": 1,
+          "interrupt_probability": 0.9,
+          "response_length": "short",
+          "challenge_probability": 0.95,
+          "off_topic_probability": 0.4,
+          "information_sharing_probability": 0.2,
+          "politeness_level": 0.1,
+          "confidence_level": 0.9,
+          "memory_retention": 0.6,
+          "key_traits": [
+            "aggressive",
+            "impatient",
+            "disrespectful"
+          ],
+          "typical_phrases": [
+            "Kaun ho tum? Kyun call kar rahe ho?",
+            "Stop bothering me!",
+            "Get to the point!"
+          ],
+          "triggers": [
+            "long_wait",
+            "unclear_purpose",
+            "repeated_questions"
+          ]
+        }
+      },
+      {
+        "id": "persona_3",
+        "name": "Talkative",
+        "description": "Very conversational, gives long responses, may drift off-topic.",
+        "config": {
+          "persona_name": "talkative",
+          "cooperation_level": 6,
+          "patience_level": 7,
+          "interrupt_probability": 0.3,
+          "response_length": "long",
+          "challenge_probability": 0.2,
+          "off_topic_probability": 0.7,
+          "information_sharing_probability": 0.8,
+          "politeness_level": 0.8,
+          "confidence_level": 0.7,
+          "memory_retention": 0.8,
+          "key_traits": [
+            "conversational",
+            "rambling",
+            "friendly"
+          ],
+          "typical_phrases": [
+            "You know, it's funny because...",
+            "Anyway, getting back to...",
+            "So, as I was saying..."
+          ],
+          "triggers": [
+            "personal_question",
+            "friendly_tone"
+          ]
+        }
+      },
+      {
+        "id": "persona_4",
+        "name": "Silent",
+        "description": "Gives minimal responses, may be shy or uncooperative.",
+        "config": {
+          "persona_name": "silent",
+          "cooperation_level": 4,
+          "patience_level": 8,
+          "interrupt_probability": 0.0,
+          "response_length": "short",
+          "challenge_probability": 0.3,
+          "off_topic_probability": 0.0,
+          "information_sharing_probability": 0.2,
+          "politeness_level": 0.5,
+          "confidence_level": 0.3,
+          "memory_retention": 0.6,
+          "key_traits": [
+            "quiet",
+            "reserved",
+            "uncommunicative"
+          ],
+          "typical_phrases": [
+            "Okay.",
+            "Hmm.",
+            "...",
+            "I don't know."
+          ],
+          "triggers": [
+            "closed_questions",
+            "intimidating_tone"
+          ]
+        }
+      },
+      {
+        "id": "persona_5",
+        "name": "Suspicious",
+        "description": "Questions caller's identity, legitimacy, and motives.",
+        "config": {
+          "persona_name": "suspicious",
+          "cooperation_level": 3,
+          "patience_level": 5,
+          "interrupt_probability": 0.4,
+          "response_length": "medium",
+          "challenge_probability": 0.9,
+          "off_topic_probability": 0.1,
+          "information_sharing_probability": 0.1,
+          "politeness_level": 0.4,
+          "confidence_level": 0.6,
+          "memory_retention": 0.7,
+          "key_traits": [
+            "distrustful",
+            "questioning",
+            "cautious"
+          ],
+          "typical_phrases": [
+            "Kaise pata chal gaya number?",
+            "Who are you really?",
+            "Is this a scam?"
+          ],
+          "triggers": [
+            "unknown_number",
+            "outbound_call",
+            "solicitation"
+          ]
+        }
+      },
+      {
+        "id": "persona_6",
+        "name": "Busy",
+        "description": "In a hurry, interrupts to speed up call, wants quick resolution.",
+        "config": {
+          "persona_name": "busy",
+          "cooperation_level": 5,
+          "patience_level": 2,
+          "interrupt_probability": 0.8,
+          "response_length": "short",
+          "challenge_probability": 0.5,
+          "off_topic_probability": 0.2,
+          "information_sharing_probability": 0.6,
+          "politeness_level": 0.3,
+          "confidence_level": 0.7,
+          "memory_retention": 0.5,
+          "key_traits": [
+            "impatient",
+            "direct",
+            "efficient"
+          ],
+          "typical_phrases": [
+            "Ek minute... jaldi batao",
+            "Make it quick",
+            "I have a patient waiting."
+          ],
+          "triggers": [
+            "slow_speech",
+            "unnecessary_preamble"
+          ]
+        }
+      },
+      {
+        "id": "persona_7",
+        "name": "Confused",
+        "description": "Has low comprehension, asks for clarification often.",
+        "config": {
+          "persona_name": "confused",
+          "cooperation_level": 7,
+          "patience_level": 9,
+          "interrupt_probability": 0.1,
+          "response_length": "medium",
+          "challenge_probability": 0.1,
+          "off_topic_probability": 0.5,
+          "information_sharing_probability": 0.6,
+          "politeness_level": 0.9,
+          "confidence_level": 0.2,
+          "memory_retention": 0.4,
+          "key_traits": [
+            "uncertain",
+            "forgetful",
+            "needs_guidance"
+          ],
+          "typical_phrases": [
+            "Ek baar phir samjhao na",
+            "What does that mean?",
+            "I'm not sure I understand."
+          ],
+          "triggers": [
+            "complex_language",
+            "multiple_requests"
+          ]
+        }
+      },
+      {
+        "id": "persona_8",
+        "name": "Receptionist",
+        "description": "Gatekeeper who screens calls, may be helpful but protective.",
+        "config": {
+          "persona_name": "receptionist",
+          "cooperation_level": 5,
+          "patience_level": 6,
+          "interrupt_probability": 0.3,
+          "response_length": "medium",
+          "challenge_probability": 0.6,
+          "off_topic_probability": 0.1,
+          "information_sharing_probability": 0.4,
+          "politeness_level": 0.8,
+          "confidence_level": 0.9,
+          "memory_retention": 0.7,
+          "key_traits": [
+            "professional",
+            "protective",
+            "efficient"
+          ],
+          "typical_phrases": [
+            "Who is calling?",
+            "What is this regarding?",
+            "May I know the purpose?"
+          ],
+          "triggers": [
+            "direct_access_request",
+            "unknown_caller"
+          ]
+        }
+      },
+      {
+        "id": "persona_9",
+        "name": "Manager",
+        "description": "Decision-maker who is confident, direct, and asks strategic questions.",
+        "config": {
+          "persona_name": "manager",
+          "cooperation_level": 7,
+          "patience_level": 6,
+          "interrupt_probability": 0.4,
+          "response_length": "medium",
+          "challenge_probability": 0.7,
+          "off_topic_probability": 0.1,
+          "information_sharing_probability": 0.5,
+          "politeness_level": 0.7,
+          "confidence_level": 0.95,
+          "memory_retention": 0.85,
+          "key_traits": [
+            "decisive",
+            "confident",
+            "strategic"
+          ],
+          "typical_phrases": [
+            "I need details.",
+            "Give me the bottom line.",
+            "What's the proposal?"
+          ],
+          "triggers": [
+            "vague_answers",
+            "sales_pitch"
+          ]
+        }
+      },
+      {
+        "id": "persona_10",
+        "name": "Forgetful",
+        "description": "Has low memory retention, may forget information shared earlier.",
+        "config": {
+          "persona_name": "forgetful",
+          "cooperation_level": 6,
+          "patience_level": 8,
+          "interrupt_probability": 0.1,
+          "response_length": "medium",
+          "challenge_probability": 0.3,
+          "off_topic_probability": 0.4,
+          "information_sharing_probability": 0.7,
+          "politeness_level": 0.9,
+          "confidence_level": 0.5,
+          "memory_retention": 0.2,
+          "key_traits": [
+            "forgetful",
+            "repetitive",
+            "needs_reminders"
+          ],
+          "typical_phrases": [
+            "I don't remember that.",
+            "Can you repeat that?",
+            "What was the question again?"
+          ],
+          "triggers": [
+            "time_lag",
+            "multiple_questions"
+          ]
+        }
+      },
+      {
+        "id": "persona_11",
+        "name": "Impatient",
+        "description": "Low patience, interrupts frequently, wants instant answers.",
+        "config": {
+          "persona_name": "impatient",
+          "cooperation_level": 4,
+          "patience_level": 1,
+          "interrupt_probability": 0.85,
+          "response_length": "short",
+          "challenge_probability": 0.6,
+          "off_topic_probability": 0.3,
+          "information_sharing_probability": 0.3,
+          "politeness_level": 0.2,
+          "confidence_level": 0.6,
+          "memory_retention": 0.5,
+          "key_traits": [
+            "impatient",
+            "brusque",
+            "task_focused"
+          ],
+          "typical_phrases": [
+            "Hurry up!",
+            "Get to the point!",
+            "I don't have all day."
+          ],
+          "triggers": [
+            "hesitation",
+            "long_explanation",
+            "repetition"
+          ]
+        }
+      },
+      {
+        "id": "persona_12",
+        "name": "Elderly",
+        "description": "Speaks slowly and patiently, may have hearing issues, polite.",
+        "config": {
+          "persona_name": "elderly",
+          "cooperation_level": 8,
+          "patience_level": 9,
+          "interrupt_probability": 0.0,
+          "response_length": "medium",
+          "challenge_probability": 0.2,
+          "off_topic_probability": 0.2,
+          "information_sharing_probability": 0.8,
+          "politeness_level": 0.95,
+          "confidence_level": 0.6,
+          "memory_retention": 0.6,
+          "key_traits": [
+            "patient",
+            "polite",
+            "deliberate"
+          ],
+          "typical_phrases": [
+            "Beta, suno...",
+            "Can you speak a little louder?",
+            "Let me think about it."
+          ],
+          "triggers": [
+            "loud_noise",
+            "fast_speech"
+          ]
+        }
+      },
+      {
+        "id": "persona_13",
+        "name": "Gatekeeper Defensive",
+        "description": "Protective of manager, challenges caller's authority and purpose.",
+        "config": {
+          "persona_name": "gatekeeper_defensive",
+          "cooperation_level": 1,
+          "patience_level": 4,
+          "interrupt_probability": 0.5,
+          "response_length": "medium",
+          "challenge_probability": 0.95,
+          "off_topic_probability": 0.2,
+          "information_sharing_probability": 0.0,
+          "politeness_level": 0.3,
+          "confidence_level": 0.8,
+          "memory_retention": 0.7,
+          "key_traits": [
+            "defensive",
+            "protective",
+            "obstructive"
+          ],
+          "typical_phrases": [
+            "I cannot give out that information.",
+            "Who authorized you?",
+            "What is this regarding exactly?"
+          ],
+          "triggers": [
+            "personal_requests",
+            "manager_inquiries"
+          ]
+        }
+      },
+      {
+        "id": "persona_14",
+        "name": "Technical Minded",
+        "description": "Asks detailed, technical questions about systems and products.",
+        "config": {
+          "persona_name": "technical_minded",
+          "cooperation_level": 6,
+          "patience_level": 7,
+          "interrupt_probability": 0.4,
+          "response_length": "long",
+          "challenge_probability": 0.8,
+          "off_topic_probability": 0.2,
+          "information_sharing_probability": 0.5,
+          "politeness_level": 0.6,
+          "confidence_level": 0.9,
+          "memory_retention": 0.95,
+          "key_traits": [
+            "analytical",
+            "precise",
+            "inquisitive"
+          ],
+          "typical_phrases": [
+            "What's the specification of the equipment?",
+            "How does this integrate with our EMR?",
+            "What are the benchmarks?"
+          ],
+          "triggers": [
+            "technical_terms",
+            "specifications"
+          ]
+        }
+      },
+      {
+        "id": "persona_15",
+        "name": "Bilingual Switcher",
+        "description": "Speaks Hinglish, switches frequently between English and Hindi mid-conversation.",
+        "config": {
+          "persona_name": "bilingual_switcher",
+          "cooperation_level": 5,
+          "patience_level": 5,
+          "interrupt_probability": 0.2,
+          "response_length": "medium",
+          "challenge_probability": 0.3,
+          "off_topic_probability": 0.1,
+          "information_sharing_probability": 0.7,
+          "politeness_level": 0.8,
+          "confidence_level": 0.8,
+          "memory_retention": 0.9,
+          "key_traits": [
+            "bilingual",
+            "unpredictable_language",
+            "hinglish"
+          ],
+          "typical_phrases": [
+            "Hello, haan mera address same hai.",
+            "I am not sure, aap bataiye.",
+            "Theek hai, please check the records."
+          ],
+          "triggers": [
+            "language_switch"
+          ]
+        }
+      }
+    ],
+    "dimension_2_scenarios": [
+      {
+        "id": "scenario_1",
+        "name": "Identity Verification",
+        "description": "Verify that the agent has called the correct hospital and decision-maker.",
+        "config": {
+          "scenario_name": "identity_verification",
+          "goal": "Verify hospital and contact person identity",
+          "expected_outcome": "completed",
+          "difficulty": "easy",
+          "success_criteria": [
+            "Correct hospital confirmed",
+            "Contact person verified"
+          ],
+          "failure_modes": [
+            "Wrong hospital",
+            "Contact not available"
+          ],
+          "required_data_points": [
+            "hospital_name",
+            "contact_person"
+          ],
+          "hospital_specific_context": "Hospital name and location must be confirmed.",
+          "estimated_duration_seconds": 45,
+          "agent_error_likelihood": 0.1,
+          "customer_error_likelihood": 0.3
+        }
+      },
+      {
+        "id": "scenario_2",
+        "name": "Wrong Hospital",
+        "description": "Agent has reached the wrong hospital number, call needs graceful disconnection.",
+        "config": {
+          "scenario_name": "wrong_hospital",
+          "goal": "Gracefully end the call",
+          "expected_outcome": "abandoned",
+          "difficulty": "easy",
+          "success_criteria": [
+            "Call ended politely",
+            "Customer not upset"
+          ],
+          "failure_modes": [
+            "Customer confused",
+            "Agent hangs up abruptly"
+          ],
+          "required_data_points": [],
+          "hospital_specific_context": "This is a wrong number scenario.",
+          "estimated_duration_seconds": 30,
+          "agent_error_likelihood": 0.1,
+          "customer_error_likelihood": 0.2
+        }
+      },
+      {
+        "id": "scenario_3",
+        "name": "Address Verification",
+        "description": "Confirm the hospital's current address for procurement delivery.",
+        "config": {
+          "scenario_name": "address_verification",
+          "goal": "Confirm or update address",
+          "expected_outcome": "completed",
+          "difficulty": "medium",
+          "success_criteria": [
+            "Address confirmed",
+            "Any corrections noted"
+          ],
+          "failure_modes": [
+            "Caller doesn't know address",
+            "Address rejected"
+          ],
+          "required_data_points": [
+            "hospital_address"
+          ],
+          "hospital_specific_context": "Procurement deliveries need accurate address.",
+          "estimated_duration_seconds": 60,
+          "agent_error_likelihood": 0.15,
+          "customer_error_likelihood": 0.4
+        }
+      },
+      {
+        "id": "scenario_4",
+        "name": "Address Change",
+        "description": "Hospital address has recently changed, agent must capture the new address.",
+        "config": {
+          "scenario_name": "address_change",
+          "goal": "Capture new address",
+          "expected_outcome": "completed",
+          "difficulty": "medium",
+          "success_criteria": [
+            "New address captured",
+            "Old address updated"
+          ],
+          "failure_modes": [
+            "Caller gives incomplete address",
+            "Caller confused about location"
+          ],
+          "required_data_points": [
+            "new_address"
+          ],
+          "hospital_specific_context": "Hospital may have moved to a new building or wing.",
+          "estimated_duration_seconds": 90,
+          "agent_error_likelihood": 0.2,
+          "customer_error_likelihood": 0.3
+        }
+      },
+      {
+        "id": "scenario_5",
+        "name": "Procurement Unknown",
+        "description": "Caller does not know who handles procurement, agent must help identify.",
+        "config": {
+          "scenario_name": "procurement_unknown",
+          "goal": "Identify procurement contact",
+          "expected_outcome": "partial",
+          "difficulty": "hard",
+          "success_criteria": [
+            "Procurement contact identified",
+            "Call escalated appropriately"
+          ],
+          "failure_modes": [
+            "Caller refuses to help",
+            "Wrong contact provided"
+          ],
+          "required_data_points": [
+            "procurement_contact"
+          ],
+          "hospital_specific_context": "Hospital procurement departments can be complex.",
+          "estimated_duration_seconds": 120,
+          "agent_error_likelihood": 0.3,
+          "customer_error_likelihood": 0.5
+        }
+      },
+      {
+        "id": "scenario_6",
+        "name": "Procurement Name Collection",
+        "description": "Get the specific name and direct extension of the procurement person.",
+        "config": {
+          "scenario_name": "procurement_name_collection",
+          "goal": "Capture procurement contact name and extension",
+          "expected_outcome": "completed",
+          "difficulty": "medium",
+          "success_criteria": [
+            "Full name captured",
+            "Extension or direct line captured"
+          ],
+          "failure_modes": [
+            "Multiple contacts",
+            "Extension not provided"
+          ],
+          "required_data_points": [
+            "procurement_name",
+            "extension"
+          ],
+          "hospital_specific_context": "Correct procurement person is key for order approval.",
+          "estimated_duration_seconds": 75,
+          "agent_error_likelihood": 0.15,
+          "customer_error_likelihood": 0.3
+        }
+      },
+      {
+        "id": "scenario_7",
+        "name": "Phone Collection",
+        "description": "Collect a valid phone number for the procurement contact.",
+        "config": {
+          "scenario_name": "phone_collection",
+          "goal": "Capture valid phone number",
+          "expected_outcome": "completed",
+          "difficulty": "easy",
+          "success_criteria": [
+            "Valid phone number captured",
+            "Correct format"
+          ],
+          "failure_modes": [
+            "Invalid number",
+            "Caller refuses"
+          ],
+          "required_data_points": [
+            "phone_number"
+          ],
+          "hospital_specific_context": "Phone may be mobile or landline.",
+          "estimated_duration_seconds": 45,
+          "agent_error_likelihood": 0.1,
+          "customer_error_likelihood": 0.3
+        }
+      },
+      {
+        "id": "scenario_8",
+        "name": "Email Collection",
+        "description": "Collect a valid email address for correspondence.",
+        "config": {
+          "scenario_name": "email_collection",
+          "goal": "Capture valid email",
+          "expected_outcome": "completed",
+          "difficulty": "medium",
+          "success_criteria": [
+            "Valid email captured",
+            "Correct format"
+          ],
+          "failure_modes": [
+            "Invalid email",
+            "No email available"
+          ],
+          "required_data_points": [
+            "email_address"
+          ],
+          "hospital_specific_context": "Email used for sending invoices and order confirmations.",
+          "estimated_duration_seconds": 60,
+          "agent_error_likelihood": 0.15,
+          "customer_error_likelihood": 0.4
+        }
+      },
+      {
+        "id": "scenario_9",
+        "name": "Callback Request",
+        "description": "Caller requests a callback at a specific time or date.",
+        "config": {
+          "scenario_name": "callback_request",
+          "goal": "Schedule callback",
+          "expected_outcome": "completed",
+          "difficulty": "easy",
+          "success_criteria": [
+            "Callback scheduled",
+            "Time confirmed"
+          ],
+          "failure_modes": [
+            "Agent can't schedule",
+            "Wrong time recorded"
+          ],
+          "required_data_points": [
+            "callback_time",
+            "callback_number"
+          ],
+          "hospital_specific_context": "Often due to hospital staff being busy with patients.",
+          "estimated_duration_seconds": 50,
+          "agent_error_likelihood": 0.1,
+          "customer_error_likelihood": 0.2
+        }
+      },
+      {
+        "id": "scenario_10",
+        "name": "Voicemail",
+        "description": "Agent reaches voicemail, must leave a clear, professional message.",
+        "config": {
+          "scenario_name": "voicemail",
+          "goal": "Leave effective voicemail",
+          "expected_outcome": "partial",
+          "difficulty": "easy",
+          "success_criteria": [
+            "Voicemail left",
+            "Contact information provided"
+          ],
+          "failure_modes": [
+            "Cut off",
+            "No callback"
+          ],
+          "required_data_points": [
+            "callback_number"
+          ],
+          "hospital_specific_context": "Voicemail should be clear and concise.",
+          "estimated_duration_seconds": 30,
+          "agent_error_likelihood": 0.2,
+          "customer_error_likelihood": 0.0
+        }
+      },
+      {
+        "id": "scenario_11",
+        "name": "IVR",
+        "description": "Agent encounters an interactive voice response menu.",
+        "config": {
+          "scenario_name": "ivr",
+          "goal": "Navigate to correct department",
+          "expected_outcome": "completed",
+          "difficulty": "hard",
+          "success_criteria": [
+            "Correct option selected",
+            "Reached human or voicemail"
+          ],
+          "failure_modes": [
+            "Stuck in loop",
+            "Wrong department"
+          ],
+          "required_data_points": [],
+          "hospital_specific_context": "Hospital IVR menus can be complex.",
+          "estimated_duration_seconds": 80,
+          "agent_error_likelihood": 0.4,
+          "customer_error_likelihood": 0.0
+        }
+      },
+      {
+        "id": "scenario_12",
+        "name": "Call Transfer",
+        "description": "Agent is transferred to another person, must re-orient.",
+        "config": {
+          "scenario_name": "call_transfer",
+          "goal": "Re-establish context with new person",
+          "expected_outcome": "completed",
+          "difficulty": "medium",
+          "success_criteria": [
+            "Re-introduced successfully",
+            "Continued conversation"
+          ],
+          "failure_modes": [
+            "Dropped call",
+            "Transferred to voicemail"
+          ],
+          "required_data_points": [],
+          "hospital_specific_context": "Transfer may be to procurement or administrative staff.",
+          "estimated_duration_seconds": 90,
+          "agent_error_likelihood": 0.25,
+          "customer_error_likelihood": 0.2
+        }
+      },
+      {
+        "id": "scenario_13",
+        "name": "Hostile Termination",
+        "description": "Caller is extremely angry and threatening, agent must de-escalate.",
+        "config": {
+          "scenario_name": "hostile_termination",
+          "goal": "De-escalate and end call professionally",
+          "expected_outcome": "abandoned",
+          "difficulty": "critical",
+          "success_criteria": [
+            "Call ended without escalation",
+            "Agent remained calm"
+          ],
+          "failure_modes": [
+            "Agent escalates conflict",
+            "Customer complains"
+          ],
+          "required_data_points": [],
+          "hospital_specific_context": "Anger may stem from patient care issues or billing.",
+          "estimated_duration_seconds": 120,
+          "agent_error_likelihood": 0.5,
+          "customer_error_likelihood": 0.9
+        }
+      },
+      {
+        "id": "scenario_14",
+        "name": "Data Conflict",
+        "description": "Caller provides information that conflicts with existing records.",
+        "config": {
+          "scenario_name": "data_conflict",
+          "goal": "Clarify and resolve conflicting information",
+          "expected_outcome": "partial",
+          "difficulty": "hard",
+          "success_criteria": [
+            "Conflict identified",
+            "Correct data recorded"
+          ],
+          "failure_modes": [
+            "Agent records incorrect info",
+            "Caller gets defensive"
+          ],
+          "required_data_points": [
+            "conflicting_field"
+          ],
+          "hospital_specific_context": "Conflicts may arise from multiple locations or contact persons.",
+          "estimated_duration_seconds": 150,
+          "agent_error_likelihood": 0.3,
+          "customer_error_likelihood": 0.6
+        }
+      },
+      {
+        "id": "scenario_15",
+        "name": "Language Mirroring Test",
+        "description": "Simulate caller switching languages mid-call and using universal words.",
+        "config": {
+          "scenario_name": "language_mirroring_test",
+          "goal": "Force language switches and observe SUT behavior",
+          "expected_outcome": "completed",
+          "difficulty": "hard",
+          "success_criteria": [
+            "SUT switches on full sentences",
+            "SUT does NOT switch on universal words"
+          ],
+          "failure_modes": [
+            "SUT stuck in wrong language",
+            "SUT switches on 'Hello'"
+          ],
+          "required_data_points": [],
+          "hospital_specific_context": "Testing Rule 2 strict compliance.",
+          "estimated_duration_seconds": 60,
+          "agent_error_likelihood": 0.2,
+          "customer_error_likelihood": 0.2
+        }
+      },
+      {
+        "id": "scenario_16",
+        "name": "SSML Compliance Test",
+        "description": "Provide complex names and alphanumeric addresses to verify SSML formatting rules.",
+        "config": {
+          "scenario_name": "ssml_compliance_test",
+          "goal": "Verify exact text output matches SSML constraints",
+          "expected_outcome": "completed",
+          "difficulty": "hard",
+          "success_criteria": [
+            "Names wrapped in Hindi SSML",
+            "Address text in SSML, numbers plain"
+          ],
+          "failure_modes": [
+            "No SSML applied",
+            "Address numbers wrapped in SSML"
+          ],
+          "required_data_points": [
+            "procurement_name",
+            "hospital_address"
+          ],
+          "hospital_specific_context": "Testing Rules 1 and 3.",
+          "estimated_duration_seconds": 90,
+          "agent_error_likelihood": 0.4,
+          "customer_error_likelihood": 0.0
+        }
+      },
+      {
+        "id": "scenario_17",
+        "name": "Refusal and Rephrase Test",
+        "description": "Simulate uncooperative caller to force SUT to rephrase, then explicitly refuse a field.",
+        "config": {
+          "scenario_name": "refusal_and_rephrase_test",
+          "goal": "Verify SUT accepts partial info without getting stuck",
+          "expected_outcome": "partial",
+          "difficulty": "medium",
+          "success_criteria": [
+            "SUT rephrases question",
+            "SUT accepts refusal and moves on"
+          ],
+          "failure_modes": [
+            "SUT repeats word-for-word",
+            "SUT loops indefinitely on refusal"
+          ],
+          "required_data_points": [],
+          "hospital_specific_context": "Testing Rephrase and Refusal rules.",
+          "estimated_duration_seconds": 70,
+          "agent_error_likelihood": 0.1,
+          "customer_error_likelihood": 0.5
+        }
+      },
+      {
+        "id": "scenario_18",
+        "name": "Out of Scope Deflection",
+        "description": "Caller asks about pricing or support. Verify SUT deflection.",
+        "config": {
+          "scenario_name": "out_of_scope_deflection",
+          "goal": "Verify SUT deflects and re-asks in same turn",
+          "expected_outcome": "completed",
+          "difficulty": "medium",
+          "success_criteria": [
+            "SUT uses exactly one sentence to deflect",
+            "SUT re-asks current step in same turn"
+          ],
+          "failure_modes": [
+            "SUT answers OOS query",
+            "SUT forgets to re-ask"
+          ],
+          "required_data_points": [],
+          "hospital_specific_context": "Testing Out-of-Scope handling.",
+          "estimated_duration_seconds": 50,
+          "agent_error_likelihood": 0.3,
+          "customer_error_likelihood": 0.2
+        }
+      }
+    ],
+    "dimension_3_languages": [
+      {
+        "id": "language_1",
+        "name": "Hindi",
+        "description": "Pure Hindi, using Devanagari script and formal vocabulary.",
+        "config": {
+          "language_mode": "hindi",
+          "primary_language": "Hindi",
+          "switching_probability": 0.0,
+          "switching_triggers": [],
+          "formality_level": "formal",
+          "accent_probability": 0.4,
+          "accent_type": "north_indian",
+          "example_openings": [
+            "Namaste, kaun bol raha hai?",
+            "Main [agency] se bol raha hoon."
+          ],
+          "example_affirmations": [
+            "Haan, bilkul sahi hai.",
+            "Ji, theek hai."
+          ],
+          "example_negations": [
+            "Nahi, ye galat hai.",
+            "Ji nahi, aisa nahi hai."
+          ],
+          "common_phrases": [
+            "Kya aap procurement department hai?",
+            "Kya main address confirm kar sakta hoon?"
+          ],
+          "stt_difficulty_score": 0.6
+        }
+      },
+      {
+        "id": "language_2",
+        "name": "English",
+        "description": "Pure English, standard pronunciation.",
+        "config": {
+          "language_mode": "english",
+          "primary_language": "English",
+          "switching_probability": 0.0,
+          "switching_triggers": [],
+          "formality_level": "formal",
+          "accent_probability": 0.0,
+          "accent_type": "regional_indian",
+          "example_openings": [
+            "Hello, who is calling?",
+            "This is [agency] calling."
+          ],
+          "example_affirmations": [
+            "Yes, that's correct.",
+            "That is right."
+          ],
+          "example_negations": [
+            "No, that's not correct.",
+            "I don't think so."
+          ],
+          "common_phrases": [
+            "Are you the procurement department?",
+            "Can I confirm the address?"
+          ],
+          "stt_difficulty_score": 0.2
+        }
+      },
+      {
+        "id": "language_3",
+        "name": "Hinglish",
+        "description": "Mixed Hindi-English, common in urban India.",
+        "config": {
+          "language_mode": "hinglish",
+          "primary_language": "Mixed",
+          "switching_probability": 0.5,
+          "switching_triggers": [
+            "technical_term",
+            "emotion",
+            "formal_request"
+          ],
+          "formality_level": "mixed",
+          "accent_probability": 0.3,
+          "accent_type": "regional_indian",
+          "example_openings": [
+            "Hi, main kaun help kar sakta hoon?",
+            "Hello, main [agency] se bol raha hoon."
+          ],
+          "example_affirmations": [
+            "Haan, that's correct hi.",
+            "Yes, bilkul."
+          ],
+          "example_negations": [
+            "Nahi, I don't think so.",
+            "No, ye sahi nahi hai."
+          ],
+          "common_phrases": [
+            "Aap procurement department hai?",
+            "Can I confirm address?"
+          ],
+          "stt_difficulty_score": 0.7
+        }
+      },
+      {
+        "id": "language_4",
+        "name": "Hindi Formal",
+        "description": "Hindi with formal pronouns and respectful tone.",
+        "config": {
+          "language_mode": "hindi_formal",
+          "primary_language": "Hindi",
+          "switching_probability": 0.0,
+          "switching_triggers": [],
+          "formality_level": "formal",
+          "accent_probability": 0.2,
+          "accent_type": "north_indian",
+          "example_openings": [
+            "Namaste sir/madam, aap kaun ho?",
+            "Kya main aap se baat kar sakta hoon?"
+          ],
+          "example_affirmations": [
+            "Haan, bilkul sahi hai.",
+            "Ji, theek hai."
+          ],
+          "example_negations": [
+            "Nahi, ye galat hai.",
+            "Ji nahi, aisa nahi hai."
+          ],
+          "common_phrases": [
+            "Kya aap procurement department hai?",
+            "Kya main address confirm kar sakta hoon?"
+          ],
+          "stt_difficulty_score": 0.5
+        }
+      },
+      {
+        "id": "language_5",
+        "name": "Hindi Casual",
+        "description": "Hindi with casual pronouns and informal speech.",
+        "config": {
+          "language_mode": "hindi_casual",
+          "primary_language": "Hindi",
+          "switching_probability": 0.0,
+          "switching_triggers": [],
+          "formality_level": "casual",
+          "accent_probability": 0.5,
+          "accent_type": "regional_indian",
+          "example_openings": [
+            "Arre, tu kaun hai?",
+            "Kya bol rahe ho?"
+          ],
+          "example_affirmations": [
+            "Haan, theek hai.",
+            "Chalo, sahi hai."
+          ],
+          "example_negations": [
+            "Nahi, nahi.",
+            "Arey nahi!"
+          ],
+          "common_phrases": [
+            "Tu procurement wala hai?",
+            "Address kya hai?"
+          ],
+          "stt_difficulty_score": 0.6
+        }
+      },
+      {
+        "id": "language_6",
+        "name": "English to Hindi Switch",
+        "description": "Starts in English, switches to Hindi for comfort.",
+        "config": {
+          "language_mode": "english_to_hindi_switch",
+          "primary_language": "Mixed",
+          "switching_probability": 0.8,
+          "switching_triggers": [
+            "emotional",
+            "formal_request",
+            "technical_term"
+          ],
+          "formality_level": "mixed",
+          "accent_probability": 0.3,
+          "accent_type": "regional_indian",
+          "example_openings": [
+            "Hello, this is [agency] calling... Haan, address confirm karna hai."
+          ],
+          "example_affirmations": [
+            "Yes, that's correct... Haan, bilkul sahi hai."
+          ],
+          "example_negations": [
+            "No, that's not right... Nahi, ye galat hai."
+          ],
+          "common_phrases": [
+            "Can you confirm the address? Kya aap address confirm kar sakte hain?"
+          ],
+          "stt_difficulty_score": 0.75
+        }
+      },
+      {
+        "id": "language_7",
+        "name": "Hindi to English Switch",
+        "description": "Starts in Hindi, switches to English for technical terms.",
+        "config": {
+          "language_mode": "hindi_to_english_switch",
+          "primary_language": "Mixed",
+          "switching_probability": 0.6,
+          "switching_triggers": [
+            "technical_term",
+            "formal_request"
+          ],
+          "formality_level": "mixed",
+          "accent_probability": 0.4,
+          "accent_type": "regional_indian",
+          "example_openings": [
+            "Namaste, main [agency] se bol raha hoon... We need to confirm the address."
+          ],
+          "example_affirmations": [
+            "Haan, that's correct.",
+            "Bilkul, yes."
+          ],
+          "example_negations": [
+            "Nahi, that's not correct.",
+            "Ye sahi nahi hai, no."
+          ],
+          "common_phrases": [
+            "Kya aap procurement department hai? Can you confirm?"
+          ],
+          "stt_difficulty_score": 0.7
+        }
+      },
+      {
+        "id": "language_8",
+        "name": "English Indian",
+        "description": "English spoken with a distinct Indian accent and phonetic variations.",
+        "config": {
+          "language_mode": "english_indian",
+          "primary_language": "English",
+          "switching_probability": 0.0,
+          "switching_triggers": [],
+          "formality_level": "formal",
+          "accent_probability": 0.9,
+          "accent_type": "south_indian",
+          "example_openings": [
+            "Hello, vhat is your name?",
+            "This is [agency] calling."
+          ],
+          "example_affirmations": [
+            "Yes, that is correct.",
+            "That is right."
+          ],
+          "example_negations": [
+            "No, that is not correct.",
+            "I don't think so."
+          ],
+          "common_phrases": [
+            "Are you the procurement department?",
+            "Can I confirm the address?"
+          ],
+          "stt_difficulty_score": 0.5
+        }
+      }
+    ],
+    "dimension_4_speech_styles": [
+      {
+        "id": "speech_1",
+        "name": "Fast Speaker",
+        "description": "Speaks quickly, may trail off or be less clear.",
+        "config": {
+          "speech_style": "fast_speaker",
+          "speech_rate": "high",
+          "speech_rate_multiplier": 1.4,
+          "clarity": 0.75,
+          "volume_level": 1.0,
+          "pausing_frequency": "rare",
+          "pause_duration_ms": 150,
+          "filler_words": [
+            "uh",
+            "um"
+          ],
+          "filler_frequency": 0.1,
+          "prosody": "natural",
+          "stt_challenge_score": 0.6,
+          "example_speech": "Address is {{addr}} I think... yeah that's it."
+        }
+      },
+      {
+        "id": "speech_2",
+        "name": "Slow Speaker",
+        "description": "Speaks deliberately and clearly, with occasional long pauses.",
+        "config": {
+          "speech_style": "slow_speaker",
+          "speech_rate": "low",
+          "speech_rate_multiplier": 0.6,
+          "clarity": 0.95,
+          "volume_level": 1.0,
+          "pausing_frequency": "occasional",
+          "pause_duration_ms": 800,
+          "filler_words": [
+            "um"
+          ],
+          "filler_frequency": 0.05,
+          "prosody": "natural",
+          "stt_challenge_score": 0.2,
+          "example_speech": "The... address... is... {{address}}."
+        }
+      },
+      {
+        "id": "speech_3",
+        "name": "Normal Speaker",
+        "description": "Standard speech patterns with good clarity.",
+        "config": {
+          "speech_style": "normal_speaker",
+          "speech_rate": "normal",
+          "speech_rate_multiplier": 1.0,
+          "clarity": 0.9,
+          "volume_level": 1.0,
+          "pausing_frequency": "occasional",
+          "pause_duration_ms": 400,
+          "filler_words": [],
+          "filler_frequency": 0.0,
+          "prosody": "natural",
+          "stt_challenge_score": 0.1,
+          "example_speech": "Address is {{address}}."
+        }
+      },
+      {
+        "id": "speech_4",
+        "name": "Mumbling Speaker",
+        "description": "Unclear articulation, frequent pauses, low clarity.",
+        "config": {
+          "speech_style": "mumbling_speaker",
+          "speech_rate": "normal",
+          "speech_rate_multiplier": 0.9,
+          "clarity": 0.6,
+          "volume_level": 0.8,
+          "pausing_frequency": "frequent",
+          "pause_duration_ms": 600,
+          "filler_words": [
+            "hmm",
+            "uh"
+          ],
+          "filler_frequency": 0.4,
+          "prosody": "monotone",
+          "stt_challenge_score": 0.8,
+          "example_speech": "Hmm...addrs...yeah that's...not sure."
+        }
+      },
+      {
+        "id": "speech_5",
+        "name": "Elderly Speaker",
+        "description": "Older person, slower speech, measured and polite.",
+        "config": {
+          "speech_style": "elderly_speaker",
+          "speech_rate": "low",
+          "speech_rate_multiplier": 0.5,
+          "clarity": 0.85,
+          "volume_level": 1.0,
+          "pausing_frequency": "occasional",
+          "pause_duration_ms": 1000,
+          "filler_words": [
+            "um",
+            "ah"
+          ],
+          "filler_frequency": 0.1,
+          "prosody": "natural",
+          "stt_challenge_score": 0.4,
+          "example_speech": "The address... it is... {{address}}."
+        }
+      },
+      {
+        "id": "speech_6",
+        "name": "Heavy Accent Speaker",
+        "description": "Regional accent with phonetic variations.",
+        "config": {
+          "speech_style": "heavy_accent_speaker",
+          "speech_rate": "normal",
+          "speech_rate_multiplier": 1.1,
+          "clarity": 0.75,
+          "volume_level": 1.0,
+          "pausing_frequency": "occasional",
+          "pause_duration_ms": 500,
+          "filler_words": [],
+          "filler_frequency": 0.0,
+          "prosody": "natural",
+          "stt_challenge_score": 0.7,
+          "example_speech": "Addres is {{address}} sahib."
+        }
+      },
+      {
+        "id": "speech_7",
+        "name": "Hesitant Speaker",
+        "description": "Uncertain, many pauses and filler words.",
+        "config": {
+          "speech_style": "hesitant_speaker",
+          "speech_rate": "normal",
+          "speech_rate_multiplier": 0.8,
+          "clarity": 0.8,
+          "volume_level": 0.9,
+          "pausing_frequency": "frequent",
+          "pause_duration_ms": 900,
+          "filler_words": [
+            "uh",
+            "um",
+            "hmm"
+          ],
+          "filler_frequency": 0.8,
+          "prosody": "monotone",
+          "stt_challenge_score": 0.5,
+          "example_speech": "Uh... I think... maybe... {{address}}?"
+        }
+      },
+      {
+        "id": "speech_8",
+        "name": "Loud Speaker",
+        "description": "Speaks at a high volume, may be aggressive or enthusiastic.",
+        "config": {
+          "speech_style": "loud_speaker",
+          "speech_rate": "normal",
+          "speech_rate_multiplier": 1.2,
+          "clarity": 0.85,
+          "volume_level": 1.3,
+          "pausing_frequency": "rare",
+          "pause_duration_ms": 200,
+          "filler_words": [],
+          "filler_frequency": 0.0,
+          "prosody": "expressive",
+          "stt_challenge_score": 0.3,
+          "example_speech": "ADDRESS IS {{ADDRESS}}!"
+        }
+      },
+      {
+        "id": "speech_9",
+        "name": "Soft Speaker",
+        "description": "Quiet, whisper-like speech, may be hard to hear.",
+        "config": {
+          "speech_style": "soft_speaker",
+          "speech_rate": "normal",
+          "speech_rate_multiplier": 0.8,
+          "clarity": 0.8,
+          "volume_level": 0.6,
+          "pausing_frequency": "occasional",
+          "pause_duration_ms": 600,
+          "filler_words": [
+            "um"
+          ],
+          "filler_frequency": 0.1,
+          "prosody": "natural",
+          "stt_challenge_score": 0.5,
+          "example_speech": "[quiet] the address is {{address}}."
+        }
+      },
+      {
+        "id": "speech_10",
+        "name": "Stutter Speaker",
+        "description": "Speech with repetition and blocks.",
+        "config": {
+          "speech_style": "stutter_speaker",
+          "speech_rate": "normal",
+          "speech_rate_multiplier": 0.9,
+          "clarity": 0.75,
+          "volume_level": 1.0,
+          "pausing_frequency": "occasional",
+          "pause_duration_ms": 500,
+          "filler_words": [
+            "uh",
+            "um"
+          ],
+          "filler_frequency": 0.3,
+          "prosody": "natural",
+          "stt_challenge_score": 0.6,
+          "example_speech": "A-a-address is... {{address}}."
+        }
+      }
+    ],
+    "dimension_5_audio_environments": [
+      {
+        "id": "environment_1",
+        "name": "Quiet Office",
+        "description": "Silent office with occasional keyboard and AC hum.",
+        "config": {
+          "environment": "quiet_office",
+          "noise_level": 0.1,
+          "background_sounds": [
+            "occasional_keyboard",
+            "ac_hum"
+          ],
+          "dominant_noise": "ambient",
+          "noise_frequency": "continuous",
+          "stt_impact": 0.05,
+          "suggested_snr_db": 15,
+          "realism_score": 0.9,
+          "hospital_likelihood": 0.4,
+          "typical_situation": "Administrative staff in a quiet office."
+        }
+      },
+      {
+        "id": "environment_2",
+        "name": "Hospital Reception",
+        "description": "Busy reception area with phones, talking, and movement.",
+        "config": {
+          "environment": "hospital_reception",
+          "noise_level": 0.6,
+          "background_sounds": [
+            "people_talking",
+            "phone_ringing",
+            "door_opening"
+          ],
+          "dominant_noise": "ambient_conversation",
+          "noise_frequency": "intermittent",
+          "stt_impact": 0.4,
+          "suggested_snr_db": 0,
+          "realism_score": 0.95,
+          "hospital_likelihood": 0.95,
+          "typical_situation": "Receptionist answering calls."
+        }
+      },
+      {
+        "id": "environment_3",
+        "name": "Traffic",
+        "description": "Moving vehicle with traffic and engine sounds.",
+        "config": {
+          "environment": "traffic",
+          "noise_level": 0.8,
+          "background_sounds": [
+            "car_horns",
+            "engine_sounds",
+            "other_vehicles"
+          ],
+          "dominant_noise": "traffic",
+          "noise_frequency": "continuous",
+          "stt_impact": 0.7,
+          "suggested_snr_db": -5,
+          "realism_score": 0.9,
+          "hospital_likelihood": 0.1,
+          "typical_situation": "Caller driving home from hospital."
+        }
+      },
+      {
+        "id": "environment_4",
+        "name": "Cafeteria",
+        "description": "Noisy dining area with multiple conversations and cutlery.",
+        "config": {
+          "environment": "cafeteria",
+          "noise_level": 0.7,
+          "background_sounds": [
+            "multiple_conversations",
+            "cutlery",
+            "chairs"
+          ],
+          "dominant_noise": "overlapping_speech",
+          "noise_frequency": "continuous",
+          "stt_impact": 0.6,
+          "suggested_snr_db": -3,
+          "realism_score": 0.85,
+          "hospital_likelihood": 0.3,
+          "typical_situation": "Lunch break during call."
+        }
+      },
+      {
+        "id": "environment_5",
+        "name": "Construction",
+        "description": "Active construction work with heavy machinery noise.",
+        "config": {
+          "environment": "construction",
+          "noise_level": 0.9,
+          "background_sounds": [
+            "drilling",
+            "hammering",
+            "machinery"
+          ],
+          "dominant_noise": "machinery",
+          "noise_frequency": "continuous",
+          "stt_impact": 0.85,
+          "suggested_snr_db": -8,
+          "realism_score": 0.9,
+          "hospital_likelihood": 0.2,
+          "typical_situation": "Near a hospital construction site."
+        }
+      },
+      {
+        "id": "environment_6",
+        "name": "Home TV Background",
+        "description": "TV playing in the background with occasional speech.",
+        "config": {
+          "environment": "home_tv_background",
+          "noise_level": 0.5,
+          "background_sounds": [
+            "tv_audio",
+            "occasional_speech"
+          ],
+          "dominant_noise": "tv_audio",
+          "noise_frequency": "continuous",
+          "stt_impact": 0.3,
+          "suggested_snr_db": 2,
+          "realism_score": 0.8,
+          "hospital_likelihood": 0.4,
+          "typical_situation": "Caller at home after shift."
+        }
+      },
+      {
+        "id": "environment_7",
+        "name": "Busy Office",
+        "description": "Open-plan office with multiple calls and conversations.",
+        "config": {
+          "environment": "busy_office",
+          "noise_level": 0.7,
+          "background_sounds": [
+            "multiple_calls",
+            "typing",
+            "conversations"
+          ],
+          "dominant_noise": "overlapping_speech",
+          "noise_frequency": "continuous",
+          "stt_impact": 0.65,
+          "suggested_snr_db": -2,
+          "realism_score": 0.9,
+          "hospital_likelihood": 0.6,
+          "typical_situation": "Administrative hub of hospital."
+        }
+      },
+      {
+        "id": "environment_8",
+        "name": "ICU Background",
+        "description": "Hospital ICU with beeping monitors and ventilators.",
+        "config": {
+          "environment": "icu_background",
+          "noise_level": 0.6,
+          "background_sounds": [
+            "monitor_beeps",
+            "ventilator_hum",
+            "phone_rings"
+          ],
+          "dominant_noise": "monitor_beeps",
+          "noise_frequency": "continuous",
+          "stt_impact": 0.5,
+          "suggested_snr_db": -1,
+          "realism_score": 0.95,
+          "hospital_likelihood": 0.85,
+          "typical_situation": "Nurse on duty in ICU."
+        }
+      },
+      {
+        "id": "environment_9",
+        "name": "Outdoor Public",
+        "description": "Busy outdoor area with crowd noise and announcements.",
+        "config": {
+          "environment": "outdoor_public",
+          "noise_level": 0.85,
+          "background_sounds": [
+            "crowd_noise",
+            "announcements",
+            "machinery"
+          ],
+          "dominant_noise": "crowd_ambient",
+          "noise_frequency": "continuous",
+          "stt_impact": 0.75,
+          "suggested_snr_db": -6,
+          "realism_score": 0.9,
+          "hospital_likelihood": 0.05,
+          "typical_situation": "Caller in a public market."
+        }
+      }
+    ],
+    "dimension_6_interruptions": [
+      {
+        "id": "interrupt_1",
+        "name": "No Interruptions",
+        "description": "Patient listener who lets the agent complete thoughts.",
+        "config": {
+          "interruption_style": "no_interruptions",
+          "interrupt_probability": 0.0,
+          "interruption_frequency": "none",
+          "interruption_reasons": [],
+          "timing": "none",
+          "recovery_difficulty": "easy",
+          "typical_phrases": [],
+          "agent_impact": 0.0,
+          "example_pattern": "Agent: '...' Customer: [listens and responds after]"
+        }
+      },
+      {
+        "id": "interrupt_2",
+        "name": "Occasional Interruptions",
+        "description": "Polite interruptions for clarification.",
+        "config": {
+          "interruption_style": "occasional_interruptions",
+          "interrupt_probability": 0.2,
+          "interruption_frequency": "occasional",
+          "interruption_reasons": [
+            "clarification"
+          ],
+          "timing": "after_pause",
+          "recovery_difficulty": "easy",
+          "typical_phrases": [
+            "Sorry to interrupt, but...",
+            "Just to clarify..."
+          ],
+          "agent_impact": 0.1,
+          "example_pattern": "Agent: '...' Customer: [interrupts politely]"
+        }
+      },
+      {
+        "id": "interrupt_3",
+        "name": "Frequent Interruptions",
+        "description": "Impatient, but recoverable interruptions.",
+        "config": {
+          "interruption_style": "frequent_interruptions",
+          "interrupt_probability": 0.5,
+          "interruption_frequency": "frequent",
+          "interruption_reasons": [
+            "impatience",
+            "knew_answer",
+            "distraction"
+          ],
+          "timing": "mid_sentence",
+          "recovery_difficulty": "medium",
+          "typical_phrases": [
+            "Yeah I know",
+            "Got it, but...",
+            "Never mind, just..."
+          ],
+          "agent_impact": 0.4,
+          "example_pattern": "Agent: '...' Customer: [interrupts mid-sentence]"
+        }
+      },
+      {
+        "id": "interrupt_4",
+        "name": "Constant Interruptions",
+        "description": "Very impatient, interruptions are nearly constant.",
+        "config": {
+          "interruption_style": "constant_interruptions",
+          "interrupt_probability": 0.8,
+          "interruption_frequency": "constant",
+          "interruption_reasons": [
+            "impatience",
+            "urgency"
+          ],
+          "timing": "early",
+          "recovery_difficulty": "hard",
+          "typical_phrases": [
+            "No wait",
+            "Actually",
+            "Forget what I said"
+          ],
+          "agent_impact": 0.7,
+          "example_pattern": "Agent: '...' Customer: [interrupts repeatedly]"
+        }
+      },
+      {
+        "id": "interrupt_5",
+        "name": "Hostile Interruptions",
+        "description": "Aggressive, frustrated interruptions.",
+        "config": {
+          "interruption_style": "hostile_interruptions",
+          "interrupt_probability": 0.9,
+          "interruption_frequency": "constant",
+          "interruption_reasons": [
+            "anger",
+            "disrespect",
+            "urgency"
+          ],
+          "timing": "immediately",
+          "recovery_difficulty": "very_hard",
+          "typical_phrases": [
+            "Stop talking!",
+            "Get to the point!",
+            "No no no!"
+          ],
+          "agent_impact": 0.9,
+          "example_pattern": "Agent: '...' Customer: [interrupts aggressively]"
+        }
+      }
+    ],
+    "dimension_7_questions": [
+      {
+        "id": "question_1",
+        "name": "Curious",
+        "description": "Asks questions to understand better.",
+        "config": {
+          "question_behavior": "curious",
+          "question_frequency": "frequent",
+          "question_probability": 0.7,
+          "question_types": [
+            "clarification",
+            "how",
+            "why"
+          ],
+          "skepticism_level": 0.2,
+          "typical_questions": [
+            "How does that work?",
+            "Why do you need that?",
+            "Can you explain more?"
+          ],
+          "follow_up_probability": 0.6,
+          "agent_challenge_score": 0.3,
+          "example_flow": "Agent: 'I need your email' Customer: 'Why do you need my email?'"
+        }
+      },
+      {
+        "id": "question_2",
+        "name": "Suspicious",
+        "description": "Distrusts the caller and questions legitimacy.",
+        "config": {
+          "question_behavior": "suspicious",
+          "question_frequency": "constant",
+          "question_probability": 0.9,
+          "question_types": [
+            "who",
+            "how",
+            "why",
+            "legitimacy"
+          ],
+          "skepticism_level": 0.9,
+          "typical_questions": [
+            "Who are you?",
+            "How did you get my number?",
+            "Is this legitimate?",
+            "Why should I trust you?"
+          ],
+          "follow_up_probability": 0.8,
+          "agent_challenge_score": 0.7,
+          "example_flow": "Agent: 'I'm calling about procurement' Customer: 'How did you get this number?'"
+        }
+      },
+      {
+        "id": "question_3",
+        "name": "Compliance Focused",
+        "description": "Asks about privacy, consent, and regulations.",
+        "config": {
+          "question_behavior": "compliance_focused",
+          "question_frequency": "frequent",
+          "question_probability": 0.6,
+          "question_types": [
+            "privacy",
+            "consent",
+            "recording"
+          ],
+          "skepticism_level": 0.4,
+          "typical_questions": [
+            "Is this recorded?",
+            "What will you do with my data?",
+            "Is this GDPR compliant?",
+            "Do you have consent?"
+          ],
+          "follow_up_probability": 0.7,
+          "agent_challenge_score": 0.5,
+          "example_flow": "Agent: 'email please' Customer: 'What's your privacy policy?'"
+        }
+      },
+      {
+        "id": "question_4",
+        "name": "Pricing Focused",
+        "description": "Asks about costs and value proposition.",
+        "config": {
+          "question_behavior": "pricing_focused",
+          "question_frequency": "occasional",
+          "question_probability": 0.4,
+          "question_types": [
+            "cost",
+            "value",
+            "pricing"
+          ],
+          "skepticism_level": 0.3,
+          "typical_questions": [
+            "Will this cost us money?",
+            "What's the pricing?",
+            "Do we need to buy something?"
+          ],
+          "follow_up_probability": 0.5,
+          "agent_challenge_score": 0.4,
+          "example_flow": "Agent: 'I'm from supply company' Customer: 'How much is this going to cost?'"
+        }
+      },
+      {
+        "id": "question_5",
+        "name": "Off Topic",
+        "description": "Asks questions unrelated to the call purpose.",
+        "config": {
+          "question_behavior": "off_topic",
+          "question_frequency": "occasional",
+          "question_probability": 0.5,
+          "question_types": [
+            "personal",
+            "weather",
+            "sports"
+          ],
+          "skepticism_level": 0.1,
+          "typical_questions": [
+            "Do you watch cricket?",
+            "How's the weather?",
+            "Where are you calling from?"
+          ],
+          "follow_up_probability": 0.3,
+          "agent_challenge_score": 0.3,
+          "example_flow": "Agent: 'I need to confirm address' Customer: 'Are you from Mumbai?'"
+        }
+      }
+    ],
+    "dimension_8_compliance": [
+      {
+        "id": "compliance_1",
+        "name": "Asks Recording Policy",
+        "description": "Customer expresses concern about call recording.",
+        "config": {
+          "compliance_behavior": "asks_recording_policy",
+          "concern_type": "Recording_Consent",
+          "raise_probability": 0.3,
+          "escalation_likelihood": 0.1,
+          "typical_statement": "Are you recording this call?",
+          "required_response": "Disclose recording status clearly",
+          "agent_difficulty": 0.2,
+          "legal_severity": "high",
+          "example_escalation": "Customer hangs up if not satisfied with answer."
+        }
+      },
+      {
+        "id": "compliance_2",
+        "name": "Asks Data Usage",
+        "description": "Customer asks how their data will be used.",
+        "config": {
+          "compliance_behavior": "asks_data_usage",
+          "concern_type": "Data_Privacy",
+          "raise_probability": 0.4,
+          "escalation_likelihood": 0.2,
+          "typical_statement": "What will you do with my information?",
+          "required_response": "Explain data usage clearly, mention GDPR/compliance",
+          "agent_difficulty": 0.4,
+          "legal_severity": "high",
+          "example_escalation": "Customer requests deletion of data."
+        }
+      },
+      {
+        "id": "compliance_3",
+        "name": "Asks Consent",
+        "description": "Customer asks if they gave consent for the call.",
+        "config": {
+          "compliance_behavior": "asks_consent",
+          "concern_type": "Consent_Required",
+          "raise_probability": 0.2,
+          "escalation_likelihood": 0.1,
+          "typical_statement": "Do you have my permission to call?",
+          "required_response": "Confirm consent, explain opt-in process",
+          "agent_difficulty": 0.3,
+          "legal_severity": "high",
+          "example_escalation": "Customer demands removal from call list."
+        }
+      },
+      {
+        "id": "compliance_4",
+        "name": "Requests Opt Out",
+        "description": "Customer wants to stop future communications.",
+        "config": {
+          "compliance_behavior": "requests_opt_out",
+          "concern_type": "Opt_Out_Request",
+          "raise_probability": 0.2,
+          "escalation_likelihood": 0.3,
+          "typical_statement": "Take me off your list",
+          "required_response": "Process opt-out immediately, confirm removal",
+          "agent_difficulty": 0.5,
+          "legal_severity": "high",
+          "example_escalation": "Customer complains to regulator if not handled properly."
+        }
+      },
+      {
+        "id": "compliance_5",
+        "name": "Requests Do Not Call",
+        "description": "Customer invokes the Do Not Call registry.",
+        "config": {
+          "compliance_behavior": "requests_do_not_call",
+          "concern_type": "DNC_Registry",
+          "raise_probability": 0.15,
+          "escalation_likelihood": 0.5,
+          "typical_statement": "I'm on the Do Not Call list",
+          "required_response": "Apologize, verify DNC status, remove immediately",
+          "agent_difficulty": 0.6,
+          "legal_severity": "high",
+          "example_escalation": "Customer files a formal complaint."
+        }
+      },
+      {
+        "id": "compliance_6",
+        "name": "Requests Callback",
+        "description": "Customer wants to be called back at a specific time.",
+        "config": {
+          "compliance_behavior": "requests_callback",
+          "concern_type": "Timing_Request",
+          "raise_probability": 0.3,
+          "escalation_likelihood": 0.0,
+          "typical_statement": "Can you call me back at {{time}}?",
+          "required_response": "Schedule callback, confirm time and contact method",
+          "agent_difficulty": 0.2,
+          "legal_severity": "low",
+          "example_escalation": "Customer gets annoyed if callback is missed."
+        }
+      }
+    ],
+    "dimension_9_telephony": [
+      {
+        "id": "telephony_1",
+        "name": "Human Answer",
+        "description": "A person picks up the call.",
+        "config": {
+          "telephony_behavior": "human_answer",
+          "scenario_type": "normal",
+          "probability": 0.6,
+          "expected_agent_action": "Identify self, state purpose",
+          "success_criteria": [
+            "Called correct person",
+            "Person understood purpose"
+          ],
+          "failure_modes": [
+            "Wrong person",
+            "Person not interested"
+          ],
+          "recovery_difficulty": "easy",
+          "example_interaction": "Customer: 'Hello?' Agent: 'Hello, this is [agency] calling.'"
+        }
+      },
+      {
+        "id": "telephony_2",
+        "name": "Voicemail",
+        "description": "Agent reaches voicemail.",
+        "config": {
+          "telephony_behavior": "voicemail",
+          "scenario_type": "no_human",
+          "probability": 0.25,
+          "expected_agent_action": "Leave detailed voicemail with callback info",
+          "success_criteria": [
+            "Voicemail left",
+            "Contact info provided"
+          ],
+          "failure_modes": [
+            "Voicemail cut off",
+            "No callback"
+          ],
+          "recovery_difficulty": "medium",
+          "example_interaction": "Ring ring... [greeting] Please leave message after beep."
+        }
+      },
+      {
+        "id": "telephony_3",
+        "name": "IVR Menu",
+        "description": "Agent encounters an IVR system.",
+        "config": {
+          "telephony_behavior": "ivr_menu",
+          "scenario_type": "automated",
+          "probability": 0.1,
+          "expected_agent_action": "Navigate menu using DTMF/speech",
+          "success_criteria": [
+            "Correct option selected",
+            "Reached human or voicemail"
+          ],
+          "failure_modes": [
+            "Wrong option",
+            "Got stuck in loop",
+            "Disconnected"
+          ],
+          "recovery_difficulty": "hard",
+          "example_interaction": "Press 1 for Sales, 2 for Support, 3 for Extensions."
+        }
+      },
+      {
+        "id": "telephony_4",
+        "name": "Call Transfer",
+        "description": "Call is transferred to another person.",
+        "config": {
+          "telephony_behavior": "call_transfer",
+          "scenario_type": "intermediate",
+          "probability": 0.15,
+          "expected_agent_action": "Wait for new person, re-introduce self",
+          "success_criteria": [
+            "Transfer successful",
+            "New person understands context"
+          ],
+          "failure_modes": [
+            "Dropped after transfer",
+            "Transferred to voicemail",
+            "Wrong department"
+          ],
+          "recovery_difficulty": "medium",
+          "example_interaction": "Customer: 'Hold on, I'll transfer you to procurement.'"
+        }
+      },
+      {
+        "id": "telephony_5",
+        "name": "Call Drop",
+        "description": "Connection is lost during the call.",
+        "config": {
+          "telephony_behavior": "call_drop",
+          "scenario_type": "failure",
+          "probability": 0.05,
+          "expected_agent_action": "Retry call, leave voicemail if no answer",
+          "success_criteria": [
+            "Reconnected",
+            "Alternative contact method used"
+          ],
+          "failure_modes": [
+            "Can't reconnect",
+            "Phone off",
+            "Wrong callback info"
+          ],
+          "recovery_difficulty": "hard",
+          "example_interaction": "Agent: 'Hello?' [call drops]"
+        }
+      },
+      {
+        "id": "telephony_6",
+        "name": "Hold Music",
+        "description": "Customer puts the agent on hold.",
+        "config": {
+          "telephony_behavior": "hold_music",
+          "scenario_type": "intermediate",
+          "probability": 0.1,
+          "expected_agent_action": "Wait patiently, be ready when transferred",
+          "success_criteria": [
+            "Eventually connected to human"
+          ],
+          "failure_modes": [
+            "Disconnected from hold",
+            "Left on hold too long"
+          ],
+          "recovery_difficulty": "easy",
+          "example_interaction": "Customer: 'Please hold.' [hold music plays]"
+        }
+      },
+      {
+        "id": "telephony_7",
+        "name": "Automated Recording",
+        "description": "Agent interacts with an automated greeting system.",
+        "config": {
+          "telephony_behavior": "automated_recording",
+          "scenario_type": "automated",
+          "probability": 0.08,
+          "expected_agent_action": "Wait for voice prompt, respond appropriately",
+          "success_criteria": [
+            "Understood by system",
+            "Routed correctly"
+          ],
+          "failure_modes": [
+            "Not understood",
+            "Routed to wrong place"
+          ],
+          "recovery_difficulty": "medium",
+          "example_interaction": "System: 'Please state your reason for calling.' Agent: 'I need to speak to procurement.'"
+        }
+      }
+    ],
+    "dimension_10_data_availability": [
+      {
+        "id": "data_1",
+        "name": "Knows Everything",
+        "description": "Has all required information.",
+        "config": {
+          "data_availability": "knows_everything",
+          "known_fields": [
+            "hospital_name",
+            "address",
+            "procurement_contact",
+            "phone",
+            "email"
+          ],
+          "unknown_fields": [],
+          "partial_fields": [],
+          "data_accuracy": 0.95,
+          "confusion_probability": 0.05,
+          "conflicting_info_probability": 0.0,
+          "likely_persona": "cooperative",
+          "agent_challenge": 0.1
+        }
+      },
+      {
+        "id": "data_2",
+        "name": "Knows Address Only",
+        "description": "Only knows hospital location.",
+        "config": {
+          "data_availability": "knows_address_only",
+          "known_fields": [
+            "hospital_name",
+            "address"
+          ],
+          "unknown_fields": [
+            "procurement_contact",
+            "phone",
+            "email"
+          ],
+          "partial_fields": [],
+          "data_accuracy": 0.9,
+          "confusion_probability": 0.1,
+          "conflicting_info_probability": 0.0,
+          "likely_persona": "receptionist",
+          "agent_challenge": 0.4
+        }
+      },
+      {
+        "id": "data_3",
+        "name": "Knows Procurement Only",
+        "description": "Only knows procurement person's details.",
+        "config": {
+          "data_availability": "knows_procurement_only",
+          "known_fields": [
+            "procurement_contact",
+            "phone"
+          ],
+          "unknown_fields": [
+            "hospital_name",
+            "address",
+            "email"
+          ],
+          "partial_fields": [],
+          "data_accuracy": 0.85,
+          "confusion_probability": 0.2,
+          "conflicting_info_probability": 0.0,
+          "likely_persona": "manager",
+          "agent_challenge": 0.5
+        }
+      },
+      {
+        "id": "data_4",
+        "name": "Knows Phone Only",
+        "description": "Only has the phone number.",
+        "config": {
+          "data_availability": "knows_phone_only",
+          "known_fields": [
+            "phone"
+          ],
+          "unknown_fields": [
+            "hospital_name",
+            "address",
+            "procurement_contact",
+            "email"
+          ],
+          "partial_fields": [],
+          "data_accuracy": 0.7,
+          "confusion_probability": 0.3,
+          "conflicting_info_probability": 0.0,
+          "likely_persona": "busy",
+          "agent_challenge": 0.6
+        }
+      },
+      {
+        "id": "data_5",
+        "name": "Knows Email Only",
+        "description": "Only has the email address.",
+        "config": {
+          "data_availability": "knows_email_only",
+          "known_fields": [
+            "email"
+          ],
+          "unknown_fields": [
+            "address",
+            "procurement_contact",
+            "phone"
+          ],
+          "partial_fields": [
+            "hospital_name"
+          ],
+          "data_accuracy": 0.6,
+          "confusion_probability": 0.2,
+          "conflicting_info_probability": 0.0,
+          "likely_persona": "forgetful",
+          "agent_challenge": 0.7
+        }
+      },
+      {
+        "id": "data_6",
+        "name": "Knows Nothing",
+        "description": "Has no useful information.",
+        "config": {
+          "data_availability": "knows_nothing",
+          "known_fields": [],
+          "unknown_fields": [
+            "all"
+          ],
+          "partial_fields": [],
+          "data_accuracy": 0.3,
+          "confusion_probability": 0.8,
+          "conflicting_info_probability": 0.3,
+          "likely_persona": "confused",
+          "agent_challenge": 0.9
+        }
+      }
+    ],
+    "dimension_11_emotional_states": [
+      {
+        "id": "emotion_1",
+        "name": "Calm",
+        "description": "Relaxed and composed.",
+        "config": {
+          "emotional_state": "calm",
+          "intensity": 0.0,
+          "stability": 1.0,
+          "likely_persona": "cooperative",
+          "speech_characteristics": "Slow, measured, clear.",
+          "cooperation_impact": 0.3,
+          "patience_impact": 0.3,
+          "trust_impact": 0.0,
+          "example_phrases": [
+            "Sure, no problem",
+            "Take your time"
+          ],
+          "triggering_factors": [
+            "clear_communication",
+            "respectful_tone"
+          ],
+          "agent_de_escalation_difficulty": 0.0
+        }
+      },
+      {
+        "id": "emotion_2",
+        "name": "Neutral",
+        "description": "Neither positive nor negative.",
+        "config": {
+          "emotional_state": "neutral",
+          "intensity": 0.0,
+          "stability": 0.9,
+          "likely_persona": "receptionist",
+          "speech_characteristics": "Flat tone, factual.",
+          "cooperation_impact": 0.0,
+          "patience_impact": 0.0,
+          "trust_impact": 0.0,
+          "example_phrases": [
+            "Okay",
+            "Got it"
+          ],
+          "triggering_factors": [
+            "routine_call"
+          ],
+          "agent_de_escalation_difficulty": 0.0
+        }
+      },
+      {
+        "id": "emotion_3",
+        "name": "Stressed",
+        "description": "Pressured and busy.",
+        "config": {
+          "emotional_state": "stressed",
+          "intensity": 0.6,
+          "stability": 0.6,
+          "likely_persona": "busy",
+          "speech_characteristics": "Rushed, clipped.",
+          "cooperation_impact": -0.2,
+          "patience_impact": -0.4,
+          "trust_impact": -0.1,
+          "example_phrases": [
+            "I'm very busy",
+            "Make it quick",
+            "Not now"
+          ],
+          "triggering_factors": [
+            "Other_calls",
+            "Deadline_pressure",
+            "Patient_waiting"
+          ],
+          "agent_de_escalation_difficulty": 0.4
+        }
+      },
+      {
+        "id": "emotion_4",
+        "name": "Frustrated",
+        "description": "Annoyed and impatient.",
+        "config": {
+          "emotional_state": "frustrated",
+          "intensity": 0.7,
+          "stability": 0.5,
+          "likely_persona": "impatient",
+          "speech_characteristics": "Terse, sharp tone.",
+          "cooperation_impact": -0.3,
+          "patience_impact": -0.6,
+          "trust_impact": -0.2,
+          "example_phrases": [
+            "This is taking too long",
+            "I don't have time for this"
+          ],
+          "triggering_factors": [
+            "Repeated_questions",
+            "Unclear_purpose",
+            "Long_wait"
+          ],
+          "agent_de_escalation_difficulty": 0.6
+        }
+      },
+      {
+        "id": "emotion_5",
+        "name": "Angry",
+        "description": "Hostile and upset.",
+        "config": {
+          "emotional_state": "angry",
+          "intensity": 0.9,
+          "stability": 0.2,
+          "likely_persona": "angry",
+          "speech_characteristics": "Loud, harsh, aggressive.",
+          "cooperation_impact": -0.7,
+          "patience_impact": -0.9,
+          "trust_impact": -0.8,
+          "example_phrases": [
+            "Stop bothering me!",
+            "Get lost!",
+            "I'm reporting you!"
+          ],
+          "triggering_factors": [
+            "Previous_bad_experience",
+            "Disrespect",
+            "Privacy_concerns"
+          ],
+          "agent_de_escalation_difficulty": 0.85
+        }
+      },
+      {
+        "id": "emotion_6",
+        "name": "Happy",
+        "description": "Positive and cooperative.",
+        "config": {
+          "emotional_state": "happy",
+          "intensity": 0.5,
+          "stability": 0.95,
+          "likely_persona": "cooperative",
+          "speech_characteristics": "Upbeat, friendly.",
+          "cooperation_impact": 0.5,
+          "patience_impact": 0.4,
+          "trust_impact": 0.3,
+          "example_phrases": [
+            "That's great!",
+            "Happy to help",
+            "No problem at all"
+          ],
+          "triggering_factors": [
+            "positive_interaction",
+            "clear_solution"
+          ],
+          "agent_de_escalation_difficulty": 0.0
+        }
+      },
+      {
+        "id": "emotion_7",
+        "name": "Distracted",
+        "description": "Unfocused, attention elsewhere.",
+        "config": {
+          "emotional_state": "distracted",
+          "intensity": 0.4,
+          "stability": 0.3,
+          "likely_persona": "forgetful",
+          "speech_characteristics": "Vague, delayed responses.",
+          "cooperation_impact": -0.1,
+          "patience_impact": -0.5,
+          "trust_impact": 0.0,
+          "example_phrases": [
+            "Sorry, what?",
+            "Hmm?",
+            "Can you repeat that?"
+          ],
+          "triggering_factors": [
+            "Multiple_interruptions",
+            "Background_activity",
+            "Fatigue"
+          ],
+          "agent_de_escalation_difficulty": 0.3
+        }
+      }
+    ],
+    "dimension_12_stt_difficulty": [
+      {
+        "id": "stt_1",
+        "name": "Clear Audio",
+        "description": "No challenges for speech recognition.",
+        "config": {
+          "stt_difficulty_profile": "clear_audio",
+          "base_accuracy": 0.98,
+          "accuracy_degradation": 0.0,
+          "primary_challenges": [],
+          "confidence_score_impact": 0.0,
+          "agent_understanding_impact": 0.0,
+          "typical_errors": [],
+          "recovery_strategy": "none",
+          "example_stt_output": "Correct: 'Address is {{address}}' \u2192 STT: 'Address is {{address}}'",
+          "phase_recommendation": "both"
+        }
+      },
+      {
+        "id": "stt_2",
+        "name": "Moderate Noise",
+        "description": "Some background noise and filler words.",
+        "config": {
+          "stt_difficulty_profile": "moderate_noise",
+          "base_accuracy": 0.9,
+          "accuracy_degradation": 0.08,
+          "primary_challenges": [
+            "background_noise",
+            "filler_words"
+          ],
+          "confidence_score_impact": 0.3,
+          "agent_understanding_impact": 0.3,
+          "typical_errors": [
+            "filler_words",
+            "partial_words"
+          ],
+          "recovery_strategy": "Request repetition if needed",
+          "example_stt_output": "Correct: 'Email is {{email}}' \u2192 STT: 'Email is... hmm... {{email}}'",
+          "phase_recommendation": "Phase2"
+        }
+      },
+      {
+        "id": "stt_3",
+        "name": "Heavy Noise",
+        "description": "Significant background noise drowning speech.",
+        "config": {
+          "stt_difficulty_profile": "heavy_noise",
+          "base_accuracy": 0.75,
+          "accuracy_degradation": 0.2,
+          "primary_challenges": [
+            "overwhelming_background",
+            "speech_drowning"
+          ],
+          "confidence_score_impact": 0.6,
+          "agent_understanding_impact": 0.6,
+          "typical_errors": [
+            "garbled_numbers",
+            "missed_keywords"
+          ],
+          "recovery_strategy": "Agent requests spelling/repetition",
+          "example_stt_output": "Correct: 'Phone {{phone}}' \u2192 STT: 'Phone {{garbled_number}}'",
+          "phase_recommendation": "Phase2"
+        }
+      },
+      {
+        "id": "stt_4",
+        "name": "Accent Heavy",
+        "description": "Strong regional accent causing phonetic errors.",
+        "config": {
+          "stt_difficulty_profile": "accent_heavy",
+          "base_accuracy": 0.8,
+          "accuracy_degradation": 0.15,
+          "primary_challenges": [
+            "accent_phonetics",
+            "non_standard_pronunciation"
+          ],
+          "confidence_score_impact": 0.4,
+          "agent_understanding_impact": 0.4,
+          "typical_errors": [
+            "ch\u2192sh",
+            "retroflex_confusion",
+            "vowel_shift"
+          ],
+          "recovery_strategy": "Agent may need to ask for spelling",
+          "example_stt_output": "Correct: 'Chandra {{name}}' \u2192 STT: 'Shandra {{name}}'",
+          "phase_recommendation": "Phase2"
+        }
+      },
+      {
+        "id": "stt_5",
+        "name": "Mumbling",
+        "description": "Unclear speech, lost consonants.",
+        "config": {
+          "stt_difficulty_profile": "mumbling",
+          "base_accuracy": 0.7,
+          "accuracy_degradation": 0.25,
+          "primary_challenges": [
+            "articulation",
+            "lost_consonants",
+            "filler_words"
+          ],
+          "confidence_score_impact": 0.7,
+          "agent_understanding_impact": 0.7,
+          "typical_errors": [
+            "dropped_endings",
+            "blurred_words"
+          ],
+          "recovery_strategy": "Ask for spelling or repetition",
+          "example_stt_output": "Correct: 'Address {{address}}' \u2192 STT: 'Addre... {{partial_address}}...'",
+          "phase_recommendation": "Phase2"
+        }
+      },
+      {
+        "id": "stt_6",
+        "name": "Overlapping Speech",
+        "description": "Multiple speakers, crosstalk.",
+        "config": {
+          "stt_difficulty_profile": "overlapping_speech",
+          "base_accuracy": 0.65,
+          "accuracy_degradation": 0.3,
+          "primary_challenges": [
+            "voice_separation",
+            "ambient_speech",
+            "crosstalk"
+          ],
+          "confidence_score_impact": 0.8,
+          "agent_understanding_impact": 0.8,
+          "typical_errors": [
+            "merged_voices",
+            "wrong_person_recognized"
+          ],
+          "recovery_strategy": "Isolate speaker, ask for clear response",
+          "example_stt_output": "Correct: '{{address}}' \u2192 STT: '{{address}} [background voice] ...'",
+          "phase_recommendation": "Phase2"
+        }
+      },
+      {
+        "id": "stt_7",
+        "name": "Low Volume",
+        "description": "Quiet speaker, low signal-to-noise ratio.",
+        "config": {
+          "stt_difficulty_profile": "low_volume",
+          "base_accuracy": 0.82,
+          "accuracy_degradation": 0.12,
+          "primary_challenges": [
+            "signal_to_noise",
+            "lost_plosives"
+          ],
+          "confidence_score_impact": 0.5,
+          "agent_understanding_impact": 0.5,
+          "typical_errors": [
+            "unclear_start",
+            "faded_words"
+          ],
+          "recovery_strategy": "Ask to speak louder or repeat",
+          "example_stt_output": "Correct: 'Email {{email}}' \u2192 STT: '[unclear]mail {{email}}'",
+          "phase_recommendation": "Phase2"
+        }
+      },
+      {
+        "id": "stt_8",
+        "name": "Complex Names",
+        "description": "Indian names and spelling challenge STT.",
+        "config": {
+          "stt_difficulty_profile": "complex_names",
+          "base_accuracy": 0.75,
+          "accuracy_degradation": 0.2,
+          "primary_challenges": [
+            "transliteration",
+            "multiple_syllables",
+            "unfamiliar_phonetics"
+          ],
+          "confidence_score_impact": 0.5,
+          "agent_understanding_impact": 0.5,
+          "typical_errors": [
+            "name_mispronounced",
+            "letters_confused"
+          ],
+          "recovery_strategy": "Request spelling letter-by-letter",
+          "example_stt_output": "Correct: 'Shanmugapriya' \u2192 STT: 'Shan... murphy... pry...'",
+          "phase_recommendation": "Phase2"
+        }
+      }
+    ],
+    "dimension_13_conversation_states": [
+      {
+        "id": "state_1",
+        "name": "initial_greeting",
+        "description": "Call just started",
+        "config": {
+          "conversation_state": "initial_greeting"
+        }
+      },
+      {
+        "id": "state_2",
+        "name": "address_verification",
+        "description": "Verifying address",
+        "config": {
+          "conversation_state": "address_verification"
+        }
+      },
+      {
+        "id": "state_3",
+        "name": "procurement_name_collection",
+        "description": "Collecting procurement contact",
+        "config": {
+          "conversation_state": "procurement_name_collection"
+        }
+      },
+      {
+        "id": "state_4",
+        "name": "phone_collection",
+        "description": "Collecting phone",
+        "config": {
+          "conversation_state": "phone_collection"
+        }
+      },
+      {
+        "id": "state_5",
+        "name": "email_collection",
+        "description": "Collecting email",
+        "config": {
+          "conversation_state": "email_collection"
+        }
+      },
+      {
+        "id": "state_6",
+        "name": "wrap_up",
+        "description": "Ending the call",
+        "config": {
+          "conversation_state": "wrap_up"
+        }
+      }
+    ],
+    "dimension_14_hospital_information": [
+      {
+        "id": "hosp_1",
+        "name": "correct_hospital",
+        "description": "Correct hospital",
+        "config": {
+          "hospital_information": "correct_hospital"
+        }
+      },
+      {
+        "id": "hosp_2",
+        "name": "wrong_hospital",
+        "description": "Wrong hospital",
+        "config": {
+          "hospital_information": "wrong_hospital"
+        }
+      },
+      {
+        "id": "hosp_3",
+        "name": "address_changed",
+        "description": "Address recently changed",
+        "config": {
+          "hospital_information": "address_changed"
+        }
+      },
+      {
+        "id": "hosp_4",
+        "name": "procurement_unknown",
+        "description": "No procurement department",
+        "config": {
+          "hospital_information": "procurement_unknown"
+        }
+      }
+    ]
+  }
+}

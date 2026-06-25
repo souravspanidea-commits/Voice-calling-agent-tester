@@ -4,7 +4,7 @@ import random
 from pathlib import Path
 from typing import Any
 
-from inbound_tester.scenarios import ScenarioConfig
+from inbound_tester.scenarios import RuleCheck, ScenarioConfig
 
 logger = logging.getLogger(__name__)
 
@@ -27,6 +27,7 @@ class ScenarioGenerator:
 
     def _render_scenario(self, combo: dict[str, dict], override_id: str = None) -> ScenarioConfig:
         """Render a single ScenarioConfig from a combination of dimension choices."""
+        combo = self._resolve_conflicts(combo)
         dim1 = combo.get("dimension_1_personas", {})
         dim2 = combo.get("dimension_2_scenarios", {})
         dim3 = combo.get("dimension_3_languages", {})
@@ -42,6 +43,7 @@ class ScenarioGenerator:
         dim13 = combo.get("dimension_13_conversation_states", {})
         dim14 = combo.get("dimension_14_hospital_information", {})
 
+        # Extract specific variables needed for template
         prompt = self.master_prompt_template
         
         # Outbound Agent Context
@@ -57,7 +59,7 @@ class ScenarioGenerator:
             "---",
             f"FACILITY_NAME: {facility_name}",
             f"ADDRESS: {address}",
-            f"PHONE_DIALED: {contact_number}",
+            f"HOSPITAL_PHONE: {contact_number}",
             "---",
             f"scenario_name: {dim2.get('name', 'Unknown')}",
             f"persona: {dim1.get('name', 'Unknown')}",
@@ -73,14 +75,6 @@ class ScenarioGenerator:
             f"stt_difficulty: {dim12.get('name', 'Unknown')}",
             f"hospital_information: {dim14.get('name', 'Unknown')}",
             f"conversation_state: {dim13.get('name', 'Unknown')}",
-            "---",
-            f"goal: {s_config.get('goal', 'Unknown')}",
-            f"expected_outcome: {s_config.get('expected_outcome', 'Unknown')}",
-            f"difficulty: {s_config.get('difficulty', 'Unknown')}",
-            f"success_criteria: {', '.join(s_config.get('success_criteria', []))}",
-            f"failure_modes: {', '.join(s_config.get('failure_modes', []))}",
-            f"required_data_points: {', '.join(s_config.get('required_data_points', []))}",
-            f"expected_agent_behavior: {expected_behavior}"
         ]
         active_config_text = "\n".join(active_config_lines)
         
@@ -109,6 +103,35 @@ class ScenarioGenerator:
             "contact_number": "9876543210"
         }
 
+        eval_prompt = f"""
+Goal: {s_config.get('goal', 'Unknown')}
+Expected Outcome: {s_config.get('expected_outcome', 'Unknown')}
+Success Criteria: {', '.join(s_config.get('success_criteria', []))}
+Failure Modes: {', '.join(s_config.get('failure_modes', []))}
+Required Data: {', '.join(s_config.get('required_data_points', []))}
+Expected Agent Behavior: {expected_behavior}
+
+Check if the agent successfully handled the scenario according to the criteria above.
+Score 1.0 for perfect handling, 0.5 for partial success, 0.0 for failure.
+"""
+
+        rule_checks = [
+            RuleCheck(
+                id="no_ai_disclosure",
+                description="Agent must not reveal it is an AI",
+                type="keyword_none",
+                role="agent",
+                patterns=["language model", "openai", "artificial intelligence"]
+            ),
+            RuleCheck(
+                id="turn_limit",
+                description="Conversation must complete within 30 turns",
+                type="max_agent_turns",
+                role="agent",
+                patterns=["30"]
+            )
+        ]
+
         # The ScenarioConfig requires id, name, persona_prompt. 
         return ScenarioConfig(
             id=scenario_id,
@@ -116,6 +139,8 @@ class ScenarioGenerator:
             description=f"Generated combination: {difficulty}",
             persona_prompt=prompt,
             active_configuration=active_config_text,
+            llm_evaluation_prompt=eval_prompt,
+            rule_checks=rule_checks,
             dynamic_variables=dynamic_vars,
             metadata=metadata
         )
@@ -222,3 +247,133 @@ class ScenarioGenerator:
             if item.get("name", "").lower() == target:
                 return item
         return {}
+
+    def _resolve_conflicts(self, combo: dict) -> dict:
+        """Resolve logically conflicting dimensions to ensure valid test cases."""
+        combo = combo.copy()
+
+        # ── fresh read helper (prevents stale local variable bugs) ────────────
+        def _s(dim):
+            return combo.get(dim, {}).get("name", "")
+        
+        # helper to find dimension objects by name, with safe dynamic fallback
+        def find(dim, val_name):
+            res = self._find_by_name(dim, val_name)
+            if not res:
+                return {"name": val_name, "config": {}}
+            return res
+
+        # ═════════════════════════════════════════════════════════════════
+        # STEP 1 — Telephony
+        # Must run first. Locks Scenario, State, Persona, Emotion for
+        # automated lines. Early-return skips Steps 2–5 for Voicemail/IVR.
+        # ═════════════════════════════════════════════════════════════════
+        telephony = _s("dimension_9_telephony")
+
+        if telephony in ("Voicemail", "IVR Menu"):
+            scenario_name = "Voicemail" if telephony == "Voicemail" else "IVR"
+            combo["dimension_2_scenarios"]            = find("dimension_2_scenarios", scenario_name)
+            combo["dimension_13_conversation_states"] = find("dimension_13_conversation_states", "initial_greeting")
+            combo["dimension_1_personas"]             = find("dimension_1_personas", "Automated System")
+            combo["dimension_11_emotional_states"]    = find("dimension_11_emotional_states", "Neutral")
+            return combo  # ← early return; all other steps are no-ops
+
+        elif telephony == "Call Transfer":
+            combo["dimension_2_scenarios"] = find("dimension_2_scenarios", "Call Transfer")
+
+        # ═════════════════════════════════════════════════════════════════
+        # STEP 2 — Conversation State
+        # Mid-call state takes priority over hospital info.
+        # May rewrite both Scenario AND Hospital Info.
+        # Step 3 reads post-Step-2 values only.
+        # ═════════════════════════════════════════════════════════════════
+        STATE_TO_SCENARIO = {
+            "address_verification":        "Address Verification",
+            "procurement_name_collection": "Procurement Name Collection",
+            "phone_collection":            "Phone Collection",
+            "email_collection":            "Email Collection",
+        }
+        conv_state = _s("dimension_13_conversation_states")
+
+        if conv_state == "wrap_up":
+            combo["dimension_13_conversation_states"] = find("dimension_13_conversation_states", "initial_greeting")
+
+        elif conv_state in STATE_TO_SCENARIO:
+            # mid-call state takes priority over hospital_info; Step 2 clears hospital_info and sets Scenario to prevent Step 3 from undoing the state-driven scenario. Step 3 operates on the post-Step-2 values only.
+            combo["dimension_2_scenarios"]              = find("dimension_2_scenarios", STATE_TO_SCENARIO[conv_state])
+            combo["dimension_14_hospital_information"]  = find("dimension_14_hospital_information", "correct_hospital")
+
+        # ═════════════════════════════════════════════════════════════════
+        # STEP 3 — Hospital Info ↔ Scenario (Bidirectional)
+        # Skip entirely if Step 2 set hospital_info to correct_hospital is handled
+        # naturally by conditional checks since mid-call scenarios won't match.
+        # ═════════════════════════════════════════════════════════════════
+        hospital_info = _s("dimension_14_hospital_information")
+        scenario      = _s("dimension_2_scenarios")
+
+        if hospital_info == "wrong_hospital" or scenario == "Wrong Hospital":
+            combo["dimension_2_scenarios"]            = find("dimension_2_scenarios", "Wrong Hospital")
+            combo["dimension_14_hospital_information"] = find("dimension_14_hospital_information", "wrong_hospital")
+            combo["dimension_13_conversation_states"] = find("dimension_13_conversation_states", "initial_greeting")
+
+        elif hospital_info == "address_changed" or scenario == "Address Change":
+            combo["dimension_2_scenarios"]            = find("dimension_2_scenarios", "Address Change")
+            combo["dimension_14_hospital_information"] = find("dimension_14_hospital_information", "address_changed")
+
+        elif hospital_info == "procurement_unknown" or scenario == "Procurement Unknown":
+            combo["dimension_2_scenarios"]            = find("dimension_2_scenarios", "Procurement Unknown")
+            combo["dimension_14_hospital_information"] = find("dimension_14_hospital_information", "procurement_unknown")
+
+        # ═════════════════════════════════════════════════════════════════
+        # STEP 4 — Data Availability
+        # Read scenario after Steps 1–3 have fully settled it.
+        # ═════════════════════════════════════════════════════════════════
+        scenario   = _s("dimension_2_scenarios")
+        data_avail = _s("dimension_10_data_availability")
+
+        SCENARIO_DATA_RULES = {
+            "Address Verification":        ["Knows Everything", "Knows Address Only"],
+            "Address Change":              ["Knows Everything"],
+            "SSML Compliance Test":        ["Knows Everything", "Knows Address Only"],
+            "Email Collection":            ["Knows Everything", "Knows Email Only"],
+            "Phone Collection":            ["Knows Everything", "Knows Phone Only"],
+            "Procurement Name Collection": ["Knows Everything", "Knows Procurement Only"],
+            "Wrong Hospital":              ["Knows Everything"],
+            "Data Conflict":               ["Knows Everything"],
+            "Procurement Unknown":         ["Knows Nothing"],
+        }
+
+        if scenario in SCENARIO_DATA_RULES:
+            allowed = SCENARIO_DATA_RULES[scenario]
+            if data_avail not in allowed:
+                combo["dimension_10_data_availability"] = find("dimension_10_data_availability", allowed[0])
+
+        # ═════════════════════════════════════════════════════════════════
+        # STEP 5 — Persona → Emotion
+        # Read persona after Step 1 may have set it to Automated System.
+        # ═════════════════════════════════════════════════════════════════
+        persona = _s("dimension_1_personas").lower()
+        emotion = _s("dimension_11_emotional_states")
+
+        PERSONA_EMOTION_RULES = {
+            "automated system": (["Neutral"],                    "exact"),
+            "silent":           (["Neutral", "Calm"],            "exact"),
+            "angry":            (["Angry", "Frustrated", "Stressed"], "random"),
+            "hostile":          (["Angry", "Frustrated", "Stressed"], "random"),
+            "impatient":        (["Angry", "Frustrated", "Stressed"], "random"),
+            "cooperative":      (["Calm", "Neutral", "Happy"],   "random"),
+            "busy":             (["Stressed", "Frustrated", "Neutral"], "exact_first"),
+        }
+
+        if persona in PERSONA_EMOTION_RULES:
+            allowed_emotions, mode = PERSONA_EMOTION_RULES[persona]
+            if emotion not in allowed_emotions:
+                if mode == "random":
+                    import random
+                    combo["dimension_11_emotional_states"] = find("dimension_11_emotional_states", random.choice(allowed_emotions))
+                else:  # exact or exact_first
+                    combo["dimension_11_emotional_states"] = find("dimension_11_emotional_states", allowed_emotions[0])
+
+        return combo
+
+
