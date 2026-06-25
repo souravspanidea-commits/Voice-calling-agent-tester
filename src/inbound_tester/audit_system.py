@@ -150,6 +150,7 @@ class AuditSystem:
             search_paths.append(Path(config_path))
         search_paths.extend([
             self.db_path.parent / "test_configurations.json",
+            Path(__file__).resolve().parent.parent.parent / "scenarios" / "test_configurations.json",
             Path(__file__).resolve().parent.parent.parent / "data" / "test_configurations.json",
         ])
 

@@ -13,7 +13,11 @@ class ScenarioGenerator:
         self.data_dir = data_dir
         self.scenarios_dir = scenarios_dir
         
-        self.config_path = self.data_dir / "test_configurations.json"
+        # Check scenarios directory first, fallback to data directory
+        self.config_path = self.scenarios_dir / "test_configurations.json"
+        if not self.config_path.exists():
+            self.config_path = self.data_dir / "test_configurations.json"
+            
         self.master_prompt_path = self.scenarios_dir / "master_prompt.yaml"
         
         with open(self.config_path, "r", encoding="utf-8") as f:
