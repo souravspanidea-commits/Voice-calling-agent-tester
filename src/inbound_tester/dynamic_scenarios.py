@@ -30,7 +30,7 @@ class ScenarioGenerator:
         self.coverage_tracker = {k: set() for k in self.dimensions.keys()}
 
     def _render_scenario(self, combo: dict[str, dict], override_id: str = None) -> ScenarioConfig:
-        """Render a single ScenarioConfig from a combination of dimension choices."""
+        """Render a single ScenarioConfig from a combination of dimension choices ."""
         combo = self._resolve_conflicts(combo)
         dim1 = combo.get("dimension_1_personas", {})
         dim2 = combo.get("dimension_2_scenarios", {})

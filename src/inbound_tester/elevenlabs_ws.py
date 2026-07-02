@@ -83,6 +83,10 @@ class ElevenLabsConvAIClient:
     def session(self) -> ConversationSession:
         return self._session
 
+    @property
+    def is_closed(self) -> bool:
+        return self._closed.is_set()
+
     async def connect(
         self,
         *,
@@ -122,16 +126,20 @@ class ElevenLabsConvAIClient:
             return None
 
     async def close(self) -> None:
-        self._closed.set()
-        if self._receive_task:
-            self._receive_task.cancel()
-            try:
-                await self._receive_task
-            except asyncio.CancelledError:
-                pass
         if self._ws:
             await self._ws.close()
             self._ws = None
+        if self._receive_task:
+            try:
+                await asyncio.wait_for(self._receive_task, timeout=2.0)
+            except (asyncio.TimeoutError, asyncio.CancelledError):
+                self._receive_task.cancel()
+                try:
+                    await self._receive_task
+                except asyncio.CancelledError:
+                    pass
+            self._receive_task = None
+        self._closed.set()
 
     async def _send(self, payload: dict[str, Any]) -> None:
         if not self._ws:
@@ -152,12 +160,10 @@ class ElevenLabsConvAIClient:
         current_response_parts: list[str] = []
         current_event_id: int | None = None
         current_was_corrected: bool = False
+        last_agent_transcript_index: int | None = None
 
         try:
             async for raw in self._ws:
-                if self._closed.is_set():
-                    break
-
                 event = json.loads(raw)
                 self._session.add_event(event)
                 if self.on_event:
@@ -184,14 +190,22 @@ class ElevenLabsConvAIClient:
                     text = event.get("agent_response_event", {}).get("agent_response", "")
                     eid = event.get("agent_response_event", {}).get("event_id")
                     if text:
-                        current_response_parts.append(text)
-                        # Also queue the turn immediately so callers don't have
-                        # to wait for agent_response_complete (which may arrive
-                        # much later, after all audio finishes streaming).
-                        self._session.add_complete_agent_turn(text, corrected=False)
-                        await self._pending_agent_turns.put(
-                            AgentTurn(text=text, event_id=eid)
-                        )
+                        if current_event_id != eid:
+                            # Start of a new turn
+                            current_event_id = eid
+                            current_response_parts = [text]
+                            current_was_corrected = False
+                            self._session.add_complete_agent_turn(text, corrected=False)
+                            last_agent_transcript_index = len(self._session.transcript) - 1
+                            await self._pending_agent_turns.put(
+                                AgentTurn(text=text, event_id=eid)
+                            )
+                        else:
+                            # Continuation of the current turn
+                            current_response_parts.append(text)
+                            if last_agent_transcript_index is not None:
+                                full_text = "".join(current_response_parts).strip()
+                                self._session.transcript[last_agent_transcript_index]["text"] = full_text
 
                 elif event_type == "agent_response_correction":
                     correction = event.get("agent_response_correction_event", {})
@@ -199,25 +213,23 @@ class ElevenLabsConvAIClient:
                     if corrected:
                         current_response_parts = [corrected]
                         current_was_corrected = True
+                        if last_agent_transcript_index is not None:
+                            self._session.transcript[last_agent_transcript_index]["text"] = corrected
+                            self._session.transcript[last_agent_transcript_index]["corrected"] = "true"
 
                 elif event_type == "agent_response_complete":
-                    # If we already queued from agent_response, this is a no-op
-                    # for wait_for_agent_turn (the turn was already consumed).
-                    # But we still update the session if there was a correction.
                     complete = event.get("agent_response_complete_event", {})
-                    current_event_id = complete.get("event_id")
+                    eid = complete.get("event_id")
                     full_text = "".join(current_response_parts).strip()
-                    if full_text and current_was_corrected:
-                        # Only re-queue if there was a correction we haven't delivered
-                        self._session.add_complete_agent_turn(
-                            full_text, corrected=True
-                        )
-                        await self._pending_agent_turns.put(
-                            AgentTurn(text=full_text, event_id=current_event_id)
-                        )
+                    if full_text and last_agent_transcript_index is not None:
+                        self._session.transcript[last_agent_transcript_index]["text"] = full_text
+                        if current_was_corrected:
+                            self._session.transcript[last_agent_transcript_index]["corrected"] = "true"
+
                     current_response_parts = []
                     current_event_id = None
                     current_was_corrected = False
+                    last_agent_transcript_index = None
 
                 elif event_type == "client_tool_call":
                     tool = event.get("client_tool_call", {})

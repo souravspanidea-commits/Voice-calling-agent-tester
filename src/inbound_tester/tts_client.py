@@ -211,7 +211,7 @@ class ElevenLabsTTSClient:
         chunk_size = _ULAW_CHUNK_BYTES if self.output_format == "ulaw_8000" else _PCM16_CHUNK_BYTES
 
         async with websockets.connect(url) as ws:
-            # 1. Send BOS (Begin of Stream) message
+            # 1. Send BOS (Begin of Stream) message 
             bos = {
                 "text": " ",
                 "voice_settings": {"stability": 0.5, "similarity_boost": 0.8},

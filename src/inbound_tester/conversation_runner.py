@@ -31,7 +31,7 @@ class RunResult:
     turn_latencies_ms: list[float] = field(default_factory=list)
     tester_latencies_ms: list[float] = field(default_factory=list)
     outbound_latencies_ms: list[float] = field(default_factory=list)
-    duration_sec: float = 0.0
+    duration_sec: float = 0.0 
 
     def to_dict(self) -> dict[str, Any]:
         avg_latency = (

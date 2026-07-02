@@ -375,7 +375,7 @@ class AuditSystem:
                     {
                         "dimension_1_personas": {"name": "Angry", ...},
                         "dimension_2_scenarios": {"name": "Identity Verification", ...},
-                        ...
+                        ....
                     }
 
         Returns:

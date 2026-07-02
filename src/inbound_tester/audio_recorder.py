@@ -155,3 +155,4 @@ class AudioRecorder:
 
         meta_path.write_text("\n".join(lines), encoding="utf-8")
         logger.debug("Saved audio metadata: %s", meta_path)
+ 

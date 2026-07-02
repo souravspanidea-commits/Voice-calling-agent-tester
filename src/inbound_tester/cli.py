@@ -174,7 +174,7 @@ def run_all(scenarios_dir: Path, parallel: bool, no_eval: bool, agent_id: str | 
             out = []
             for scenario, result in zip(scenarios, results):
                 if isinstance(result, Exception):
-                    out.append({"scenario_id": scenario.id, "status": "error", "error": str(result)})
+                    out.append({"scenario_id": scenario.id,  "status": "error", "error": str(result)})
                 else:
                     res_dict = result.to_dict()
                     _save_single_call_report(res_dict)

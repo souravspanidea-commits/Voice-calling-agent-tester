@@ -9,3 +9,4 @@ data/
 .pytest_cache/
 .mypy_cache/
 recordings/
+raw_events_debug.json

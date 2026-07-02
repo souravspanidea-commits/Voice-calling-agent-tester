@@ -24,6 +24,7 @@ class AudioBridge:
         self._incoming_audio_queue: asyncio.Queue[bytes] = asyncio.Queue()
         self._closed = False
         self._last_agent_audio_time: float = 0.0
+        self._agent_speaking = False
 
     # ------------------------------------------------------------------
     # Incoming agent audio (called from the WS receive loop via on_audio)
@@ -34,6 +35,7 @@ class AudioBridge:
         if self._closed:
             return
         self._last_agent_audio_time = time.monotonic()
+        self._agent_speaking = True
         try:
             raw = base64.b64decode(audio_base64)
             self._incoming_audio_queue.put_nowait(raw)
@@ -69,29 +71,34 @@ class AudioBridge:
         timeout_sec = timeout_ms / 1000.0
         deadline = time.monotonic() + timeout_sec
 
-        while time.monotonic() < deadline:
-            if self._last_agent_audio_time > 0:
-                elapsed = time.monotonic() - self._last_agent_audio_time
-                if elapsed >= quiet_sec:
-                    logger.debug(
-                        "Audio drain complete: %.0fms since last agent audio chunk",
-                        elapsed * 1000,
-                    )
-                    return elapsed * 1000
-            await asyncio.sleep(0.05)  # poll every 50ms
+        try:
+            while time.monotonic() < deadline:
+                if self._last_agent_audio_time > 0:
+                    elapsed = time.monotonic() - self._last_agent_audio_time
+                    if elapsed >= quiet_sec:
+                        logger.debug(
+                            "Audio drain complete: %.0fms since last agent audio chunk",
+                            elapsed * 1000,
+                        )
+                        return elapsed * 1000
+                await asyncio.sleep(0.05)  # poll every 50ms
 
-        elapsed = (time.monotonic() - self._last_agent_audio_time) * 1000 if self._last_agent_audio_time > 0 else 0
-        logger.warning(
-            "Audio drain timed out after %.0fms (last chunk %.0fms ago)",
-            timeout_ms,
-            elapsed,
-        )
-        return elapsed
+            elapsed = (time.monotonic() - self._last_agent_audio_time) * 1000 if self._last_agent_audio_time > 0 else 0
+            logger.warning(
+                "Audio drain timed out after %.0fms (last chunk %.0fms ago)",
+                timeout_ms,
+                elapsed,
+            )
+            return elapsed
+        finally:
+            self._agent_speaking = False
 
     async def send_persona_audio(self, pcm_bytes: bytes, audio_format: str = "ulaw_8000") -> None:
         """Base64-encode *pcm_bytes* and send as ``user_audio_chunk`` messages."""
         if self._closed:
             return
+
+        self._agent_speaking = False
 
         if audio_format == "ulaw_8000":
             bytes_per_sec = 8000.0
@@ -111,6 +118,7 @@ class AudioBridge:
         """Send pre-encoded base64 chunks as ``user_audio_chunk`` messages."""
         if self._closed:
             return
+        self._agent_speaking = False
         for chunk in b64_chunks:
             await self.ws_client.send_audio_chunk(chunk)
 
@@ -128,6 +136,8 @@ class AudioBridge:
         if self._closed:
             return
 
+        self._agent_speaking = False
+
         if audio_format == "ulaw_8000":
             # µ-law silence = 0xFF (encodes linear zero), 8000 samples/sec
             bytes_per_chunk = 8000 * chunk_ms // 1000  # 2000 bytes for 250ms
@@ -140,6 +150,9 @@ class AudioBridge:
         encoded = base64.b64encode(silence_chunk).decode("ascii")
         n_chunks = max(1, duration_ms // chunk_ms)
         for _ in range(n_chunks):
+            if self._agent_speaking:
+                logger.debug("Aborting send_silence because agent started speaking")
+                break
             await self.ws_client.send_audio_chunk(encoded)
             # Sleep less than chunk_ms to fast-forward the VAD silence clock
             await asyncio.sleep((chunk_ms / 1000.0) * 0.25)
@@ -150,3 +163,4 @@ class AudioBridge:
 
     def close(self) -> None:
         self._closed = True
+ 

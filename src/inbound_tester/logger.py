@@ -195,3 +195,4 @@ class ConversationLogger:
             if result.get("evaluation_json"):
                 result["evaluation"] = json.loads(result["evaluation_json"])
             return result
+ 

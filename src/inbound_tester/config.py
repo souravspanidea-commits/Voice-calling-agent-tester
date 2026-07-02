@@ -22,7 +22,7 @@ class Settings(BaseSettings):
 
     max_turns: int = 30
     response_timeout_sec: float = 90.0
-    agent_turn_timeout_sec: float = 15.0
+    agent_turn_timeout_sec: float = 15.0 
 
     conversation_mode: str = "audio"
     persona_voice_id: str = "iWNf11sz1GrUE4ppxTOL"  # viraj voice
