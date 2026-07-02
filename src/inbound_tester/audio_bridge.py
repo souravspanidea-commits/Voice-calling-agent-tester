@@ -25,6 +25,16 @@ class AudioBridge:
         self._closed = False
         self._last_agent_audio_time: float = 0.0
         self._agent_speaking = False
+        # Playback estimation: ElevenLabs delivers audio ahead of real-time;
+        # we track total bytes received so we can estimate when playback ends.
+        self._agent_audio_first_chunk_time: float = 0.0
+        self._agent_audio_total_bytes: int = 0
+        self._agent_audio_bytes_per_sec: float = 8000.0  # µ-law 8 kHz default
+        
+        # Open mic simulation
+        self._persona_speaking = False
+        self._silence_task: asyncio.Task | None = None
+        self._silence_audio_format = "ulaw_8000"
 
     # ------------------------------------------------------------------
     # Incoming agent audio (called from the WS receive loop via on_audio)
@@ -35,9 +45,12 @@ class AudioBridge:
         if self._closed:
             return
         self._last_agent_audio_time = time.monotonic()
+        if self._agent_audio_first_chunk_time == 0.0:
+            self._agent_audio_first_chunk_time = self._last_agent_audio_time
         self._agent_speaking = True
         try:
             raw = base64.b64decode(audio_base64)
+            self._agent_audio_total_bytes += len(raw)
             self._incoming_audio_queue.put_nowait(raw)
         except Exception as exc:
             logger.error("Failed to decode incoming audio: %s", exc)
@@ -60,13 +73,20 @@ class AudioBridge:
         self,
         quiet_ms: float = 500,
         timeout_ms: float = 5000,
+        audio_format: str = "ulaw_8000",
     ) -> float:
-        """Wait until agent audio has stopped arriving for *quiet_ms*.
+        """Wait until agent audio has stopped arriving for *quiet_ms*, then
+        wait for the estimated remaining playback to complete.
+
+        ElevenLabs delivers audio ahead of real-time (TTS generates faster
+        than 1x), so stopping chunk arrival does not mean the audio has
+        finished playing.  We track total bytes received and the time the
+        first chunk arrived to compute the playback end time, then sleep
+        until that point before returning.
 
         Returns the actual quiet duration in ms once the drain completes.
-        This prevents the persona from speaking while the SUT is still
-        streaming audio, which causes audible overlap.
         """
+        bps = 8000.0 if audio_format == "ulaw_8000" else 32000.0
         quiet_sec = quiet_ms / 1000.0
         timeout_sec = timeout_ms / 1000.0
         deadline = time.monotonic() + timeout_sec
@@ -80,6 +100,22 @@ class AudioBridge:
                             "Audio drain complete: %.0fms since last agent audio chunk",
                             elapsed * 1000,
                         )
+                        # Wait for estimated remaining playback time.
+                        # If audio was delivered faster than real-time, playback
+                        # is still ongoing even though chunks have stopped arriving.
+                        if self._agent_audio_first_chunk_time > 0.0 and self._agent_audio_total_bytes > 0:
+                            playback_end = (
+                                self._agent_audio_first_chunk_time
+                                + self._agent_audio_total_bytes / bps
+                            )
+                            extra = max(0.0, playback_end - time.monotonic())
+                            if extra > 0.05:
+                                logger.debug(
+                                    "Waiting %.0fms for playback of %.0f audio bytes",
+                                    extra * 1000,
+                                    self._agent_audio_total_bytes,
+                                )
+                                await asyncio.sleep(extra)
                         return elapsed * 1000
                 await asyncio.sleep(0.05)  # poll every 50ms
 
@@ -98,7 +134,14 @@ class AudioBridge:
         if self._closed:
             return
 
+        # Reset speaking state and playback-tracking counters before sending
+        # persona audio so the NEXT drain starts fresh.
         self._agent_speaking = False
+        self._agent_audio_first_chunk_time = 0.0
+        self._agent_audio_total_bytes = 0
+        
+        self.stop_silence()
+        self._persona_speaking = True
 
         if audio_format == "ulaw_8000":
             bytes_per_sec = 8000.0
@@ -119,43 +162,43 @@ class AudioBridge:
         if self._closed:
             return
         self._agent_speaking = False
+        self.stop_silence()
+        self._persona_speaking = True
         for chunk in b64_chunks:
             await self.ws_client.send_audio_chunk(chunk)
 
-    async def send_silence(
-        self,
-        duration_ms: int = 500,
-        audio_format: str = "ulaw_8000",
-        chunk_ms: int = 250,
-    ) -> None:
-        """Send silence frames to signal end-of-utterance to the agent's VAD.
+    def start_silence(self, audio_format: str = "ulaw_8000") -> None:
+        """Start streaming continuous silence to simulate an open microphone."""
+        self._persona_speaking = False
+        self._silence_audio_format = audio_format
+        if self._silence_task is None:
+            self._silence_task = asyncio.create_task(self._silence_loop())
 
-        The agent needs to see a speech → silence transition to know the
-        user finished talking.
-        """
-        if self._closed:
-            return
+    def stop_silence(self) -> None:
+        """Stop streaming continuous silence."""
+        if self._silence_task is not None:
+            self._silence_task.cancel()
+            self._silence_task = None
 
-        self._agent_speaking = False
+    async def _silence_loop(self) -> None:
+        """Background task that continuously pumps silence frames at real-time pacing."""
+        chunk_ms = 250
+        try:
+            while not self._closed and not self._persona_speaking:
+                if self._silence_audio_format == "ulaw_8000":
+                    bytes_per_chunk = 8000 * chunk_ms // 1000
+                    silence_chunk = b"\xff" * bytes_per_chunk
+                else:
+                    bytes_per_chunk = 32000 * chunk_ms // 1000
+                    silence_chunk = b"\x00" * bytes_per_chunk
 
-        if audio_format == "ulaw_8000":
-            # µ-law silence = 0xFF (encodes linear zero), 8000 samples/sec
-            bytes_per_chunk = 8000 * chunk_ms // 1000  # 2000 bytes for 250ms
-            silence_chunk = b"\xff" * bytes_per_chunk
-        else:
-            # PCM 16kHz 16-bit mono: silence = 0x00 bytes
-            bytes_per_chunk = 32000 * chunk_ms // 1000  # 8000 bytes for 250ms
-            silence_chunk = b"\x00" * bytes_per_chunk
-
-        encoded = base64.b64encode(silence_chunk).decode("ascii")
-        n_chunks = max(1, duration_ms // chunk_ms)
-        for _ in range(n_chunks):
-            if self._agent_speaking:
-                logger.debug("Aborting send_silence because agent started speaking")
-                break
-            await self.ws_client.send_audio_chunk(encoded)
-            # Sleep less than chunk_ms to fast-forward the VAD silence clock
-            await asyncio.sleep((chunk_ms / 1000.0) * 0.25)
+                encoded = base64.b64encode(silence_chunk).decode("ascii")
+                await self.ws_client.send_audio_chunk(encoded)
+                await asyncio.sleep(chunk_ms / 1000.0)
+        except asyncio.CancelledError:
+            pass
+        except Exception as exc:
+            logger.error("Silence loop failed: %s", exc)
 
     # ------------------------------------------------------------------
     # Lifecycle
@@ -163,4 +206,5 @@ class AudioBridge:
 
     def close(self) -> None:
         self._closed = True
+        self.stop_silence()
  

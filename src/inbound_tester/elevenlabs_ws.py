@@ -17,7 +17,11 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class AgentTurn:
-    """One outbound agent reply (text), optionally corrected."""
+    """One outbound agent reply (text), optionally corrected.
+
+    ``text`` is updated in-place as additional ``agent_response`` chunks
+    arrive so that callers always read the latest accumulated text.
+    """
 
     text: str
     event_id: int | None = None
@@ -50,12 +54,17 @@ class ConversationSession:
         # and a single complete entry is appended when agent_response_complete
         # fires — see ElevenLabsConvAIClient._receive_loop().
 
-    def add_complete_agent_turn(self, text: str, *, corrected: bool = False) -> None:
-        """Add a fully assembled agent reply to the transcript."""
+    def add_complete_agent_turn(self, text: str, *, corrected: bool = False) -> dict[str, str]:
+        """Add a fully assembled agent reply to the transcript.
+
+        Returns the dict entry so callers can update it in-place without
+        relying on a fragile integer index.
+        """
         entry: dict[str, str] = {"role": "agent", "text": text}
         if corrected:
             entry["corrected"] = "true"
         self.transcript.append(entry)
+        return entry
 
 
 class ElevenLabsConvAIClient:
@@ -160,7 +169,11 @@ class ElevenLabsConvAIClient:
         current_response_parts: list[str] = []
         current_event_id: int | None = None
         current_was_corrected: bool = False
-        last_agent_transcript_index: int | None = None
+        current_agent_turn: AgentTurn | None = None
+        # Direct reference to the transcript dict for the active agent turn.
+        # Using a dict reference (not an integer index) so that appends of
+        # user_transcript events mid-stream don't silently invalidate the index.
+        current_agent_transcript_entry: dict[str, str] | None = None
 
         try:
             async for raw in self._ws:
@@ -191,45 +204,95 @@ class ElevenLabsConvAIClient:
                     eid = event.get("agent_response_event", {}).get("event_id")
                     if text:
                         if current_event_id != eid:
-                            # Start of a new turn
-                            current_event_id = eid
-                            current_response_parts = [text]
-                            current_was_corrected = False
-                            self._session.add_complete_agent_turn(text, corrected=False)
-                            last_agent_transcript_index = len(self._session.transcript) - 1
-                            await self._pending_agent_turns.put(
-                                AgentTurn(text=text, event_id=eid)
-                            )
-                        else:
-                            # Continuation of the current turn
-                            current_response_parts.append(text)
-                            if last_agent_transcript_index is not None:
+                            # Check if the last actual turn (ignoring hallucinatory 'user_heard' noise) was this agent turn
+                            is_continuous = False
+                            if current_agent_turn is not None and current_agent_transcript_entry is not None:
+                                for entry in reversed(self._session.transcript):
+                                    if entry.get("role") == "user_heard":
+                                        continue
+                                    if entry is current_agent_transcript_entry:
+                                        is_continuous = True
+                                    break
+
+                            if is_continuous:
+                                # Continuous speech split across multiple event_ids.
+                                # Append to the existing turn instead of queuing a new one.
+                                current_event_id = eid
+                                prefix = " " if current_response_parts and not current_response_parts[-1].endswith((" ", "\n")) else ""
+                                current_response_parts.append(prefix + text)
                                 full_text = "".join(current_response_parts).strip()
-                                self._session.transcript[last_agent_transcript_index]["text"] = full_text
+                                if current_agent_turn is not None:
+                                    current_agent_turn.text = full_text
+                                if current_agent_transcript_entry is not None:
+                                    current_agent_transcript_entry["text"] = full_text
+                            else:
+                                # Start of a genuinely new turn
+                                current_event_id = eid
+                                current_response_parts = [text]
+                                current_was_corrected = False
+                                current_agent_transcript_entry = self._session.add_complete_agent_turn(
+                                    text, corrected=False
+                                )
+                                current_agent_turn = AgentTurn(text=text, event_id=eid)
+                                await self._pending_agent_turns.put(current_agent_turn)
+                        else:
+                            # Continuation of the current turn — update the
+                            # already-queued AgentTurn object and transcript entry
+                            # in-place so voice_runner always sees the latest text.
+                            current_response_parts.append(text)
+                            full_text = "".join(current_response_parts).strip()
+                            if current_agent_turn is not None:
+                                current_agent_turn.text = full_text
+                            if current_agent_transcript_entry is not None:
+                                current_agent_transcript_entry["text"] = full_text
 
                 elif event_type == "agent_response_correction":
                     correction = event.get("agent_response_correction_event", {})
                     corrected = correction.get("corrected_agent_response", "")
                     if corrected:
-                        current_response_parts = [corrected]
-                        current_was_corrected = True
-                        if last_agent_transcript_index is not None:
-                            self._session.transcript[last_agent_transcript_index]["text"] = corrected
-                            self._session.transcript[last_agent_transcript_index]["corrected"] = "true"
+                        current_text = "".join(current_response_parts)
+                        # ElevenLabs sends a "correction" when the agent is interrupted
+                        # mid-speech: the corrected text is SHORTER than what was
+                        # generated and ends with "..." to mark the cut-off point.
+                        # We skip these interruption corrections and keep the longer,
+                        # more complete text that the agent intended to say.
+                        is_interruption = (
+                            corrected.rstrip().endswith("...")
+                            and len(corrected) <= len(current_text)
+                        )
+                        if is_interruption:
+                            logger.debug(
+                                "Skipping interruption correction (kept %d chars over %d)",
+                                len(current_text), len(corrected),
+                            )
+                        else:
+                            # Genuine LLM correction — apply it
+                            current_response_parts = [corrected]
+                            current_was_corrected = True
+                            if current_agent_turn is not None:
+                                current_agent_turn.text = corrected
+                            if current_agent_transcript_entry is not None:
+                                current_agent_transcript_entry["text"] = corrected
+                                current_agent_transcript_entry["corrected"] = "true"
 
                 elif event_type == "agent_response_complete":
                     complete = event.get("agent_response_complete_event", {})
                     eid = complete.get("event_id")
                     full_text = "".join(current_response_parts).strip()
-                    if full_text and last_agent_transcript_index is not None:
-                        self._session.transcript[last_agent_transcript_index]["text"] = full_text
-                        if current_was_corrected:
-                            self._session.transcript[last_agent_transcript_index]["corrected"] = "true"
+                    # Final authoritative update to both the live AgentTurn and transcript entry
+                    if full_text:
+                        if current_agent_turn is not None:
+                            current_agent_turn.text = full_text
+                        if current_agent_transcript_entry is not None:
+                            current_agent_transcript_entry["text"] = full_text
+                            if current_was_corrected:
+                                current_agent_transcript_entry["corrected"] = "true"
 
                     current_response_parts = []
                     current_event_id = None
                     current_was_corrected = False
-                    last_agent_transcript_index = None
+                    current_agent_turn = None
+                    current_agent_transcript_entry = None
 
                 elif event_type == "client_tool_call":
                     tool = event.get("client_tool_call", {})

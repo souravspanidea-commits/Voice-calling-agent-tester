@@ -166,11 +166,14 @@ class VoiceRunner:
             # Wait for the agent's first response
             t0 = time.monotonic()
             first_agent_chunk_flag = True
+            bridge.start_silence(audio_format=self.tts.output_format)
             first_agent = await client.wait_for_agent_turn(self.settings.agent_turn_timeout_sec)
-            # Start drain as background task — LLM will run concurrently
-            drain_task: asyncio.Task | None = asyncio.create_task(
-                _timed_drain(bridge, quiet_ms=800, timeout_ms=5000)
-            )
+            
+            # Wait for agent to finish speaking before starting the conversational loop
+            logger.debug("Waiting for agent audio to fully drain before generating reply")
+            drain_end_time, _ = await _timed_drain(bridge, quiet_ms=800, timeout_ms=5000)
+            t_agent_done = drain_end_time
+
             if first_agent:
                 logger.info("Agent: %s", first_agent.text[:120])
 
@@ -232,11 +235,6 @@ class VoiceRunner:
 
                 async for audio_chunk in audio_stream:
                     if first_audio_time is None:
-                        # Ensure agent audio has fully drained before persona speaks
-                        if drain_task is not None:
-                            drain_end_time, _ = await drain_task
-                            drain_task = None
-                            t_agent_done = drain_end_time
                         first_audio_time = time.monotonic()
                         ttfa_ms = (first_audio_time - t_tester_start) * 1000
                         latency = max(0, (first_audio_time - t_agent_done) * 1000)
@@ -247,12 +245,6 @@ class VoiceRunner:
 
                 # Ensure LLM task is cleaned up
                 await llm_task
-
-                # Handle drain if no audio was produced (silent/end-only response)
-                if drain_task is not None:
-                    drain_end_time, _ = await drain_task
-                    drain_task = None
-                    t_agent_done = drain_end_time
 
                 if first_token_time:
                     ttft_ms = (first_token_time - t_tester_start) * 1000
@@ -266,9 +258,9 @@ class VoiceRunner:
                 if is_silent:
                     logger.info("Persona [%d]: [SILENT]", turn_count)
                     recorder.add_silence(5000)
-                    await bridge.send_silence(duration_ms=5000, audio_format=self.tts.output_format)
+                    bridge.start_silence(audio_format=self.tts.output_format)
                 else:
-                    await bridge.send_silence(duration_ms=3000, audio_format=self.tts.output_format)
+                    bridge.start_silence(audio_format=self.tts.output_format)
                     logger.info("Persona [%d]: %s", turn_count, full_text[:120])
                     client.session.transcript.append({"role": "user", "text": full_text})
 
@@ -288,20 +280,17 @@ class VoiceRunner:
                 t_outbound_start = time.monotonic()
                 agent_turn = await client.wait_for_agent_turn(self.settings.agent_turn_timeout_sec)
                 outbound_ms = (time.monotonic() - t_outbound_start) * 1000
-                # Start drain as background task — next LLM call runs concurrently
-                drain_task = asyncio.create_task(
-                    _timed_drain(bridge, quiet_ms=800, timeout_ms=5000)
-                )
-                logger.debug("Agent audio drain started (non-blocking)")
+                
+                if agent_turn:
+                    # Wait for agent to finish speaking before going to the next loop iteration
+                    logger.debug("Waiting for agent audio to fully drain before generating next reply")
+                    drain_end_time, _ = await _timed_drain(bridge, quiet_ms=800, timeout_ms=5000)
+                    t_agent_done = drain_end_time
+
                 latency_ms = (time.monotonic() - t0) * 1000
                 turn_latencies.append(latency_ms)
 
                 if not agent_turn:
-                    # Await drain since we won't be sending audio next
-                    if drain_task is not None:
-                        drain_end_time, _ = await drain_task
-                        drain_task = None
-                        t_agent_done = drain_end_time
                     recorder.add_silence(int(latency_ms))
                     consecutive_timeouts += 1
                     if consecutive_timeouts >= 3:
@@ -449,9 +438,6 @@ class VoiceRunner:
         self.recorder.add_persona_audio(audio_bytes)
 
         await bridge.send_persona_audio(audio_bytes, audio_format=self.tts.output_format)
-        # Send silence so the agent's VAD sees speech → silence transition
-        await bridge.send_silence(
-            duration_ms=3000,
-            audio_format=self.tts.output_format,
-        )
+        # Start open-mic silence so the agent's VAD sees speech → silence transition
+        bridge.start_silence(audio_format=self.tts.output_format)
  
