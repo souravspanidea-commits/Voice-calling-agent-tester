@@ -19,7 +19,7 @@ st.set_page_config(page_title="Inbound Tester Agent", page_icon="🤖", layout="
 
 st.title("Inbound Tester Agent Dashboard")
 
-tab1, tab2, tab3 = st.tabs(["Run Scenario", "Dynamic Suite", "Past Runs"])
+tab1, tab2, tab3, tab4 = st.tabs(["Run Scenario", "Dynamic Suite", "Past Runs", "Evaluation Dashboard"])
 
 with tab1:
     st.header("Run a New Test")
@@ -290,55 +290,160 @@ with tab3:
                 df = pd.DataFrame(df_data)
                 st.dataframe(df, use_container_width=True, hide_index=True)
                 
-                st.subheader("Run Details Inspector")
-                selected_run_id = st.selectbox("Select a Run ID to view deep dive", [r["id"] for r in runs])
+                st.subheader("Transcript Inspector")
+                t_selected_run_id = st.selectbox("Select a Run ID to view transcript", [r["id"] for r in runs], key="tab3_run_sel")
+                if t_selected_run_id:
+                    run_details = logger.get_run(t_selected_run_id)
+                    if run_details:
+                        transcript = run_details.get("transcript", [])
+                        if transcript:
+                            st.markdown(f"### Transcript for `{t_selected_run_id}`")
+                            for msg in transcript:
+                                role = msg.get('role', '')
+                                text = msg.get('text', '')
+                                timing = ""
+                                if role.lower() == 'user':
+                                    t_ms = msg.get('tester_response_ms')
+                                    if t_ms is not None:
+                                        llm = msg.get('llm_ms')
+                                        tts = msg.get('tts_ms')
+                                        if llm is not None and tts is not None and tts > 0:
+                                            timing = f" `[{t_ms:.0f}ms] (TTFT: {llm:.0f}ms, TTFA: {tts:.0f}ms)`"
+                                        else:
+                                            timing = f" `[{t_ms:.0f}ms]`"
+                                    st.markdown(f"?? **Persona:** {text}{timing}")
+                                elif role.lower() == 'agent':
+                                    o_ms = msg.get('outbound_response_ms')
+                                    if o_ms is not None:
+                                        timing = f" `[{o_ms:.0f}ms]`"
+                                    st.markdown(f"?? **Agent:** {text}{timing}")
+                                else:
+                                    st.markdown(f"**{role.title()}:** {text}")
+                        else:
+                            st.write("No transcript available.")
+
+                
+        except Exception as e:
+            st.error(f"Error loading past runs: {e}")
+
+with tab4:
+    st.header("? Evaluation Dashboard")
+    st.markdown("A comprehensive, manager-ready view of the outbound agent's performance.")
+    
+    db_path = get_settings().sqlite_path
+    if not db_path:
+        st.warning("SQLite Database not configured.")
+    else:
+        logger = ConversationLogger(db_path)
+        try:
+            runs = logger.list_runs(limit=100)
+            if not runs:
+                st.info("No past runs found in the database.")
+            else:
+                run_options = {r["id"]: f"{r['scenario_id']} ({r['started_at']}) - {r['id']}" for r in runs}
+                selected_run_id = st.selectbox(
+                    "Select a Run to Evaluate:",
+                    options=list(run_options.keys()),
+                    format_func=lambda x: run_options[x]
+                )
                 
                 if selected_run_id:
                     run_details = logger.get_run(selected_run_id)
                     if run_details:
-                        st.markdown(f"### Inspecting: `{selected_run_id}`")
+                        eval_data = run_details.get("evaluation", {})
+                        is_pass = eval_data.get("passed")
                         
-                        r_out_tab1, r_out_tab2 = st.tabs(["Transcript", "Evaluation"])
+                        # --- 1. Top Level Status ---
+                        status_color = "green" if is_pass else "red"
+                        status_text = "? PASS" if is_pass else "? FAIL"
                         
-                        with r_out_tab1:
-                            transcript = run_details.get("transcript", [])
-                            if transcript:
-                                for msg in transcript:
-                                    role = msg.get('role', '')
-                                    text = msg.get('text', '')
-                                    timing = ""
-                                    if role.lower() == 'user':
-                                        t_ms = msg.get('tester_response_ms')
-                                        if t_ms is not None:
-                                            llm = msg.get('llm_ms')
-                                            tts = msg.get('tts_ms')
-                                            if llm is not None and tts is not None and tts > 0:
-                                                timing = f" `{t_ms:.0f}ms` *(TTFT: {llm:.0f}ms, TTFA: {tts:.0f}ms)*"
-                                            elif t_ms is not None:
-                                                timing = f" `{t_ms:.0f}ms`"
-                                        st.markdown(f"🧑 **Persona:** {text}{timing}")
-                                    elif role.lower() == 'agent':
-                                        o_ms = msg.get('outbound_response_ms')
-                                        if o_ms is not None:
-                                            timing = f" `{o_ms:.0f}ms`"
-                                        st.markdown(f"🤖 **Agent:** {text}{timing}")
-                                    else:
-                                        st.markdown(f"**{role}:** {text}")
+                        st.markdown(f"""
+                        <div style="padding: 20px; border-radius: 10px; background-color: rgba(255,255,255,0.05); text-align: center; border: 1px solid {status_color}; margin-bottom: 30px;">
+                            <h2 style="margin:0; color: {status_color};">{status_text}</h2>
+                            <p style="margin:5px 0 0 0; opacity:0.8;">Run ID: <code>{selected_run_id}</code></p>
+                        </div>
+                        """, unsafe_allow_html=True)
+                        
+                        # --- 2. High Level Scores ---
+                        c1, c2, c3, c4 = st.columns(4)
+                        with c1:
+                            with st.container(border=True):
+                                st.metric("LLM Score", f"{eval_data.get('llm_score', 'N/A')}")
+                        with c2:
+                            with st.container(border=True):
+                                st.metric("Audio Score", f"{eval_data.get('audio_score', 'N/A')}")
+                        with c3:
+                            with st.container(border=True):
+                                st.metric("Turns", run_details.get('turn_count', '0'))
+                        with c4:
+                            with st.container(border=True):
+                                dur = run_details.get('duration_sec')
+                                st.metric("Duration", f"{dur:.1f}s" if dur else "N/A")
+                                
+                        st.divider()
+                        
+                        # --- 3. Parameter Boxes (Ticks and Crosses) ---
+                        st.markdown("### ?? Semantic Evaluation Parameters")
+                        llm_details = eval_data.get('llm_details', {})
+                        s_params = eval_data.get('semantic_scores', {})
+                        if s_params:
+                            cols = st.columns(4)
+                            for i, (k, v) in enumerate(s_params.items()):
+                                passed = float(v) >= 0.6
+                                icon = "?" if passed else "?"
+                                with cols[i % 4]:
+                                    with st.container(border=True):
+                                        st.metric(label=k.replace('_', ' ').title(), value=f"{v} {icon}")
+                        else:
+                            st.info("No semantic parameters available.")
+                            
+                        st.markdown("### ??? Acoustic Evaluation Parameters")
+                        audio_details = eval_data.get('audio_details', {})
+                        a_params = eval_data.get('acoustic_scores', {})
+                        if a_params:
+                            cols = st.columns(4)
+                            for i, (k, v) in enumerate(a_params.items()):
+                                passed = float(v) >= 0.6
+                                icon = "?" if passed else "?"
+                                with cols[i % 4]:
+                                    with st.container(border=True):
+                                        st.metric(label=k.replace('_', ' ').title(), value=f"{v} {icon}")
+                        else:
+                            st.info("No acoustic parameters available.")
+                            
+                        st.divider()
+                        
+                        # --- 4. Strengths & Issues ---
+                        sc1, sc2 = st.columns(2)
+                        with sc1:
+                            st.markdown("#### ? Top Strengths")
+                            s_list = llm_details.get('strengths', []) + audio_details.get('strengths', [])
+                            for s in s_list:
+                                st.success(s)
+                        with sc2:
+                            st.markdown("#### ?? Key Issues")
+                            i_list = llm_details.get('issues', []) + audio_details.get('issues', [])
+                            for i in i_list:
+                                st.error(i)
+                                
+                        st.divider()
+                        
+                        # --- 5. Rule Checks ---
+                        st.markdown("### ?? Objective Rule Gates")
+                        rules = eval_data.get("rule_results", [])
+                        for rule in rules:
+                            if rule.get("passed"):
+                                st.info(f"? **{rule.get('id')}**: {rule.get('detail')}")
                             else:
-                                st.write("No transcript available.")
-                        
-                        with r_out_tab2:
-                            eval_data = run_details.get("evaluation")
-                            if eval_data:
-                                passed = eval_data.get("passed")
-                                st.write(f"**Overall:** {'✅ PASS' if passed else '❌ FAIL'}")
-                                st.write(f"**LLM Score:** {eval_data.get('llm_score', 'N/A')}")
-                                st.write(f"**Summary:** {eval_data.get('llm_summary', 'N/A')}")
-                                st.write("**Rule Results:**")
-                                for rule in eval_data.get("rule_results", []):
-                                    mark = "✅" if rule.get("passed") else "❌"
-                                    st.write(f"- {mark} **{rule.get('id')}**: {rule.get('detail')}")
-                            else:
-                                st.write("No evaluation data available.")
+                                st.error(f"? **{rule.get('id')}**: {rule.get('detail')}")
+
+                        st.divider()
+
+                        # --- 6. The Original Markdown Report ---
+                        from inbound_tester.evaluator import generate_markdown_report
+                        md = generate_markdown_report(run_details)
+                        with st.expander("?? View Auto-Generated Markdown Report", expanded=False):
+                            st.markdown(md)
+                            
         except Exception as e:
-             st.error(f"Error loading past runs: {e}")
+             st.error(f"Error loading evaluations: {e}")
