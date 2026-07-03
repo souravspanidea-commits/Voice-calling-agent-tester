@@ -38,7 +38,8 @@ with tab1:
         with col1:
             st.subheader("Configuration")
             selected_scenario_id = st.selectbox("Select Scenario", list(scenario_map.keys()))
-            mode = st.radio("Mode", ["text", "audio"], index=0)
+            mode = "audio"
+            st.info("Execution Mode: **audio**")
             agent_id = st.text_input("Agent ID (Override)", value="", help="Leave blank to use .env value")
             skip_eval = st.checkbox("Skip Evaluation", value=False)
             
@@ -160,7 +161,8 @@ with tab2:
         
         num_scenarios = max(1, end_idx)
         
-        mode = st.radio("Execution Mode", ["text", "audio"], index=0, key="dyn_mode")
+        mode = "audio"
+        st.info("Execution Mode: **audio**")
         agent_id = st.text_input("Agent ID (Override)", value="", key="dyn_agent")
         skip_eval = st.checkbox("Skip Evaluation", value=False, key="dyn_eval")
         
@@ -347,32 +349,59 @@ with tab3:
                 if t_selected_run_id:
                     run_details = logger.get_run(t_selected_run_id)
                     if run_details:
+                        col_t, col_a = st.columns([2, 1])
                         transcript = run_details.get("transcript", [])
-                        if transcript:
-                            st.markdown(f"### Transcript for `{t_selected_run_id}`")
-                            for msg in transcript:
-                                role = msg.get('role', '')
-                                text = msg.get('text', '')
-                                timing = ""
-                                if role.lower() == 'user':
-                                    t_ms = msg.get('tester_response_ms')
-                                    if t_ms is not None:
-                                        llm = msg.get('llm_ms')
-                                        tts = msg.get('tts_ms')
-                                        if llm is not None and tts is not None and tts > 0:
-                                            timing = f" `[{t_ms:.0f}ms] (TTFT: {llm:.0f}ms, TTFA: {tts:.0f}ms)`"
-                                        else:
-                                            timing = f" `[{t_ms:.0f}ms]`"
-                                    st.markdown(f"?? **Persona:** {text}{timing}")
-                                elif role.lower() == 'agent':
-                                    o_ms = msg.get('outbound_response_ms')
-                                    if o_ms is not None:
-                                        timing = f" `[{o_ms:.0f}ms]`"
-                                    st.markdown(f"?? **Agent:** {text}{timing}")
-                                else:
-                                    st.markdown(f"**{role.title()}:** {text}")
-                        else:
-                            st.write("No transcript available.")
+                        conversation_id = run_details.get("conversation_id")
+                        
+                        with col_a:
+                            st.subheader("Audio Playback")
+                            audio_file = None
+                            if conversation_id:
+                                recordings_dir = Path("recordings")
+                                if recordings_dir.exists():
+                                    for txt_file in recordings_dir.glob("*.txt"):
+                                        try:
+                                            with open(txt_file, "r", encoding="utf-8") as f:
+                                                content = f.read()
+                                                if f"Conversation: {conversation_id}" in content:
+                                                    wav_file = txt_file.with_suffix(".wav")
+                                                    if wav_file.exists():
+                                                        audio_file = wav_file
+                                                        break
+                                        except Exception:
+                                            pass
+                            if audio_file:
+                                st.audio(str(audio_file))
+                                st.success(f"Loaded: `{audio_file.name}`")
+                            else:
+                                st.info("No audio recording found for this run (run in text mode, or file is missing).")
+                                
+                        with col_t:
+                            if transcript:
+                                st.markdown(f"### Transcript for `{t_selected_run_id}`")
+                                for msg in transcript:
+                                    role = msg.get('role', '')
+                                    text = msg.get('text', '')
+                                    timing = ""
+                                    if role.lower() == 'user':
+                                        t_ms = msg.get('tester_response_ms')
+                                        if t_ms is not None:
+                                            llm = msg.get('llm_ms')
+                                            tts = msg.get('tts_ms')
+                                            if llm is not None and tts is not None and tts > 0:
+                                                timing = f" `[{t_ms:.0f}ms] (TTFT: {llm:.0f}ms, TTFA: {tts:.0f}ms)`"
+                                            else:
+                                                timing = f" `[{t_ms:.0f}ms]`"
+                                        st.markdown(f"🧑 **Persona:** {text}{timing}")
+                                    elif role.lower() == 'agent':
+                                        o_ms = msg.get('outbound_response_ms')
+                                        if o_ms is not None:
+                                            timing = f" `[{o_ms:.0f}ms]`"
+                                        st.markdown(f"🤖 **Agent:** {text}{timing}")
+                                    else:
+                                        st.markdown(f"**{role.title()}:** {text}")
+                            else:
+                                st.write("No transcript available.")
 
                 
         except Exception as e:
