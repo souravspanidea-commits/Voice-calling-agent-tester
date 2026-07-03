@@ -135,11 +135,30 @@ with tab2:
     st.header("Dynamic Test Suite")
     from inbound_tester.dynamic_scenarios import ScenarioGenerator
     
+    data_dir = Path("data")
+    scenarios_dir = Path("scenarios")
+    
+    try:
+        generator = ScenarioGenerator(data_dir, scenarios_dir)
+        import math
+        total_combos = math.prod(len(v) for v in generator.dimensions.values() if v)
+        st.info(f"Total possible theoretical scenarios: {total_combos}")
+    except Exception as e:
+        generator = None
+        st.error(f"Could not load generator: {e}")
+        
     col1, col2 = st.columns([1, 2])
     with col1:
         st.subheader("Suite Configuration")
         gen_mode = st.radio("Generation Mode", ["Regression Suite", "Random Sampling", "Coverage Driven", "Stress Testing"])
-        num_scenarios = st.number_input("Number of Scenarios", min_value=1, max_value=100, value=5)
+        
+        c1, c2 = st.columns(2)
+        with c1:
+            start_idx = st.number_input("Start Index", min_value=1, max_value=10000, value=1)
+        with c2:
+            end_idx = st.number_input("End Index", min_value=1, max_value=10000, value=50)
+        
+        num_scenarios = max(1, end_idx)
         
         mode = st.radio("Execution Mode", ["text", "audio"], index=0, key="dyn_mode")
         agent_id = st.text_input("Agent ID (Override)", value="", key="dyn_agent")
@@ -147,14 +166,15 @@ with tab2:
         
         gen_btn = st.button("Generate & Run Suite", type="primary", use_container_width=True)
         
+        import os
+        if os.path.exists("test_reports.csv"):
+            with open("test_reports.csv", "rb") as f:
+                st.download_button("Download Test Reports CSV", f, file_name="test_reports.csv", mime="text/csv", use_container_width=True)
+        
     with col2:
         st.subheader("Execution View")
-        if gen_btn:
-            data_dir = Path("data")
-            scenarios_dir = Path("scenarios")
-            
+        if gen_btn and generator:
             try:
-                generator = ScenarioGenerator(data_dir, scenarios_dir)
                 st.info("Generating scenarios...")
                 
                 if gen_mode == "Regression Suite":
@@ -166,12 +186,29 @@ with tab2:
                 else:
                     dyn_scenarios = generator.generate_stress_testing(num_scenarios)
                 
+                # Apply range filter
+                if start_idx <= len(dyn_scenarios):
+                    dyn_scenarios = dyn_scenarios[start_idx - 1 : end_idx]
+                else:
+                    dyn_scenarios = []
+                
                 # Show metadata summary
                 import pandas as pd
                 meta_df = pd.DataFrame([s.metadata for s in dyn_scenarios])
-                st.dataframe(meta_df, use_container_width=True)
+                if not meta_df.empty:
+                    st.dataframe(meta_df, use_container_width=True)
                 
-                st.info(f"Generated {len(dyn_scenarios)} scenarios. Starting execution...")
+                st.info(f"Generated {len(dyn_scenarios)} scenarios in range {start_idx}-{end_idx}. Starting execution...")
+                
+                # Setup CSV for live reporting
+                import csv
+                csv_file_path = "test_reports.csv"
+                csv_headers = ["Scenario ID", "Status", "Duration (s)", "Turns", "LLM Score", "Avg Tester Latency (ms)", "Avg Outbound Latency (ms)", "Avg Latency (ms)"]
+                
+                if not os.path.exists(csv_file_path):
+                    with open(csv_file_path, 'w', newline='', encoding='utf-8') as f:
+                        writer = csv.writer(f)
+                        writer.writerow(csv_headers)
                 
                 # Setup settings
                 test_settings = get_settings()
@@ -234,6 +271,21 @@ with tab2:
                     else:
                         st.info(f"{s.id} Complete! Status: {res_dict.get('status')}")
                         status_val = res_dict.get('status')
+                        
+                    # Log to CSV
+                    with open(csv_file_path, 'a', newline='', encoding='utf-8') as f:
+                        writer = csv.writer(f)
+                        eval_data = res_dict.get("evaluation", {})
+                        writer.writerow([
+                            s.id,
+                            status_val,
+                            res_dict.get("duration_sec", ""),
+                            res_dict.get("turn_count", 0),
+                            eval_data.get('llm_score', 'N/A') if isinstance(eval_data, dict) else 'N/A',
+                            res_dict.get("avg_tester_latency_ms", ""),
+                            res_dict.get("avg_outbound_latency_ms", ""),
+                            res_dict.get("avg_latency_ms", "")
+                        ])
                         
                     # Log execution
                     audit.log_test_execution(

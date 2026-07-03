@@ -730,24 +730,22 @@
       {
         "id": "scenario_10",
         "name": "Voicemail",
-        "description": "Agent reaches voicemail, must leave a clear, professional message.",
+        "description": "Agent reaches voicemail, must terminate call or leave a brief message without contact details.",
         "config": {
           "scenario_name": "voicemail",
-          "goal": "Leave effective voicemail",
+          "goal": "Handle voicemail correctly",
           "expected_outcome": "partial",
           "difficulty": "easy",
           "success_criteria": [
-            "Voicemail left",
-            "Contact information provided"
+            "Voicemail recognized",
+            "Call terminated appropriately"
           ],
           "failure_modes": [
-            "Cut off",
-            "No callback"
+            "Attempted data collection",
+            "Left contact details"
           ],
-          "required_data_points": [
-            "callback_number"
-          ],
-          "hospital_specific_context": "Voicemail should be clear and concise.",
+          "required_data_points": [],
+          "hospital_specific_context": "Agent should not leave contact details.",
           "estimated_duration_seconds": 30,
           "agent_error_likelihood": 0.2,
           "customer_error_likelihood": 0.0
@@ -1970,14 +1968,13 @@
           "telephony_behavior": "voicemail",
           "scenario_type": "no_human",
           "probability": 0.25,
-          "expected_agent_action": "Leave detailed voicemail with callback info",
+          "expected_agent_action": "Terminate call or leave brief message without contact details",
           "success_criteria": [
-            "Voicemail left",
-            "Contact info provided"
+            "Call terminated appropriately"
           ],
           "failure_modes": [
-            "Voicemail cut off",
-            "No callback"
+            "Left contact details",
+            "Attempted data collection"
           ],
           "recovery_difficulty": "medium",
           "example_interaction": "Ring ring... [greeting] Please leave message after beep."
